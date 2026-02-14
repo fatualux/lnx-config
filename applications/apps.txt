@@ -1,0 +1,17 @@
+curl
+wget
+git
+vim
+neovim
+code
+openssh
+python
+ranger
+mpv
+btop
+nodejs
+npm
+rustc
+joshuto
+golang
+fzf

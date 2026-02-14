@@ -46,27 +46,7 @@ for config_file in "$BASH_CONFIG_DIR/config"/*.sh; do
 done
 
 #═══════════════════════════════════════════════════════════════════════════════
-# 3. ALIASES (general and work-specific)
-#═══════════════════════════════════════════════════════════════════════════════
-
-for alias_file in "$BASH_CONFIG_DIR/aliases"/*.sh; do
-    if [ -f "$alias_file" ]; then
-        source "$alias_file"
-    fi
-done
-
-#═══════════════════════════════════════════════════════════════════════════════
-# 4. INTEGRATIONS (docker, fzf, cd-activate, mc)
-#═══════════════════════════════════════════════════════════════════════════════
-
-for integration_file in "$BASH_CONFIG_DIR/integrations"/*.sh; do
-    if [ -f "$integration_file" ]; then
-        source "$integration_file"
-    fi
-done
-
-#═══════════════════════════════════════════════════════════════════════════════
-# 5. FUNCTIONS (organized by category)
+# 3. FUNCTIONS (organized by category) - MUST LOAD BEFORE ALIASES
 #═══════════════════════════════════════════════════════════════════════════════
 
 # Source filesystem functions
@@ -105,7 +85,27 @@ for func_file in "$BASH_CONFIG_DIR/functions/development"/*.sh; do
 done
 
 #═══════════════════════════════════════════════════════════════════════════════
-# COMPLETION
+# 4. ALIASES (general and work-specific) - AFTER FUNCTIONS
+#═══════════════════════════════════════════════════════════════════════════════
+
+for alias_file in "$BASH_CONFIG_DIR/aliases"/*.sh; do
+    if [ -f "$alias_file" ]; then
+        source "$alias_file"
+    fi
+done
+
+#═══════════════════════════════════════════════════════════════════════════════
+# 5. INTEGRATIONS (docker, fzf, cd-activate, mc)
+#═══════════════════════════════════════════════════════════════════════════════
+
+for integration_file in "$BASH_CONFIG_DIR/integrations"/*.sh; do
+    if [ -f "$integration_file" ]; then
+        source "$integration_file"
+    fi
+done
+
+#═══════════════════════════════════════════════════════════════════════════════
+# 6. COMPLETION
 #═══════════════════════════════════════════════════════════════════════════════
 
 for completion_file in "$BASH_CONFIG_DIR/completion"/*.sh; do

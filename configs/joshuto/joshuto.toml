@@ -1,0 +1,59 @@
+numbered_command = false
+
+use_trash = true
+watch_files = true
+xdg_open = true
+xdg_open_fork = false
+
+[features]
+recycle_bin = true
+
+[display]
+# default, hsplit
+mode = "default"
+
+automatically_count_files = false
+collapse_preview = true
+# ratios for parent view (optional), current view and preview
+column_ratio = [2, 7, 2]
+scroll_offset = 6
+show_borders = true
+show_hidden = false
+show_icons = false
+tilde_in_titlebar = true
+# none, absolute, relative
+line_number_style = "absolute"
+
+[display.sort]
+# lexical, mtime, natural
+method = "natural"
+case_sensitive = false
+directories_first = true
+reverse = false
+
+[preview]
+max_preview_size = 50000097152                        # 2MB
+use_mediainfo = true
+ext.png = "feh"
+ext.jpg = "feh"
+ext.jpeg = "feh"
+ext.gif = "feh"
+ext.bmp = "feh"
+ext.tiff = "feh"
+ext.tga = "feh"
+ext.tif = "feh"
+ext.webp = "feh"
+ext.mp4 = "mpv"
+ext.mkv = "mpv"
+ext.ogv = "mpv"
+ext.mov = "mpv"
+ext.m4v = "mpv"
+ext.flv = "mpv"
+ext.m3u = "mpv"
+ext.m4a = "mpv"
+ext.wav = "mpv"
+ext.mp3 = "mpv"
+
+[tab]
+# inherit, home, root
+home_page = "inherit"
