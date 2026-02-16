@@ -1,5 +1,5 @@
 {
-  description = "My NixOS WSL system";
+  description = "FZ NixOS WSL";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
@@ -37,19 +37,69 @@
 
           # Packages
           environment.systemPackages = with pkgs; [
+            # Development tools
             git
+            git-filter-repo
             vim
+            neovim
             curl
             wget
             rustc
             cargo
+            go
+            golang
+            nodejs
+            npm
+            python3
+            python311
+            python3Packages.pip
+            python3Packages.httpx
+            python3Packages.jinja2
+            python3Packages.requests
+            python3Packages.tkinter
+            pipx
+            black
+            mypy
+            
+            # System utilities
+            bash-completion
+            fzf
+            tmux
+            tree
+            btop
+            jq
+            grep
+            ncurses
+            pkg-config
+            wl-clipboard
+            
+            # File managers
             joshuto
             ranger
-            go
-            python3
+            
+            # Media
             mpv
+            
+            # Build tools
+            buildPackages
+            cmake
+            ninja
+            gcc
+            
+            # Docker
+            docker
+            docker-compose
+            docker-buildx
+            
+            # Kubernetes
+            kubectl
+            
+            # SSH
+            openssh
+            
+            # Security
             cacert
-            nodejs
+            truststore
           ];
 
           system.stateVersion = "25.05";
