@@ -137,10 +137,10 @@ endif
 " Only set working directory when it actually changes
 let s:last_dir = ''
 autocmd BufEnter * 
-    \ let l:current_dir = expand('%:p:h') | 
-    \ if l:current_dir !=# s:last_dir | 
+    \ let s:current_dir = expand('%:p:h') | 
+    \ if s:current_dir !=# s:last_dir | 
     \     lcd %:p:h | 
-    \     let s:last_dir = l:current_dir | 
+    \     let s:last_dir = s:current_dir | 
     \ endif
 
 " Only sync syntax when needed and for large files
