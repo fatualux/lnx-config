@@ -51,23 +51,22 @@ if has('reltime')
   set incsearch
 endif
 
-" Install vim-plug if it doesn't exist
+" Install vim-plug if it doesn't exist (optimized)
 function! InstallVimPlugIfNeeded()
     let autoload_dir = expand('~/.vim/autoload')
     let plug_vim_path = autoload_dir . '/plug.vim'
 
     " Check if vim-plug is installed
     if !filereadable(plug_vim_path)
-        " If not installed, prompt user to install
+        " If not installed, install silently
         if has('unix')
-            execute '!curl -fLo ' . plug_vim_path . ' --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+            silent execute '!curl -fLo ' . plug_vim_path . ' --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim >/dev/null 2>&1'
         elseif has('win32') || has('win64')
-            execute '!powershell -command "iwr -useb https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim | ni ' . $HOME . '/vimfiles/autoload/plug.vim -Force"'
+            silent execute '!powershell -command "iwr -useb https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim | ni ' . $HOME . '/vimfiles/autoload/plug.vim -Force" >$null 2>&1'
         else
             echoerr 'Unsupported platform'
             return
         endif
-        echom 'vim-plug installed successfully!'
     endif
 endfunction
 
@@ -135,10 +134,17 @@ if has('langmap') && exists('+langremap')
   set nolangremap
 endif
 
-" configure Vim so that it sets the working directory to the current file's directory
-autocmd BufEnter * lcd %:p:h
+" Only set working directory when it actually changes
+let s:last_dir = ''
+autocmd BufEnter * 
+    \ let l:current_dir = expand('%:p:h') | 
+    \ if l:current_dir !=# s:last_dir | 
+    \     lcd %:p:h | 
+    \     let s:last_dir = l:current_dir | 
+    \ endif
 
-autocmd BufEnter * :syntax sync fromstart
+" Only sync syntax when needed and for large files
+autocmd BufEnter * if getfsize(expand('%')) < 100000 && &filetype !=# '' | syntax sync fromstart | endif
 
 " Setting folding method to 'indent'
 :setlocal foldmethod=manual
