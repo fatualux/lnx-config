@@ -24,4 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed installer hanging at "Starting NixOS configuration rebuild..." by correcting non-existent spinner function calls
 - Changed `safe_spinner_start` to `spinner_start` in nixos.sh
+- **Critical**: Fixed missing CheckBackspace function in vim general.vim that broke TAB key behavior in Coc.nvim
+- Made vim performance test paths configurable via environment variables
+- Added cache cleanup mechanism to git branch cache to prevent memory leaks
+- Added cache size limits (50 entries max) to prevent memory growth
+- Improved error handling and dependency checking in performance tests
+- Documented magic numbers with explanatory comments for better maintainability
 - Changed `safe_spinner_stop` to `spinner_stop` in nixos.sh

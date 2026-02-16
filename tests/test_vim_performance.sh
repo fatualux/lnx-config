@@ -9,11 +9,45 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../applications/core/logging.sh"
 
-# Test configuration
-TEST_DIR="/tmp/vim_config_test_$$"
-VIM_CONFIG_DIR="/root/Debian/lnx-config/configs/vim"
-STARTUP_TIME_THRESHOLD=2000  # milliseconds
-PLUGIN_LOAD_THRESHOLD=5000    # milliseconds
+# Test configuration - configurable via environment variables
+TEST_DIR="${VIM_TEST_DIR:-/tmp/vim_config_test_$$}"
+VIM_CONFIG_DIR="${VIM_CONFIG_PATH:-$SCRIPT_DIR/../configs/vim}"
+STARTUP_TIME_THRESHOLD="${VIM_STARTUP_THRESHOLD:-2000}"  # milliseconds
+PLUGIN_LOAD_THRESHOLD="${VIM_PLUGIN_THRESHOLD:-5000}"    # milliseconds
+
+# Resolve absolute path for vim config
+if [[ ! -d "$VIM_CONFIG_DIR" ]]; then
+    # Try alternative path resolution
+    VIM_CONFIG_DIR="$SCRIPT_DIR/../configs/vim"
+fi
+if [[ ! -d "$VIM_CONFIG_DIR" ]]; then
+    # Fallback to current working directory
+    VIM_CONFIG_DIR="$(pwd)/configs/vim"
+fi
+
+# Check for required dependencies
+check_dependencies() {
+    local missing_deps=()
+    
+    if ! command -v vim &> /dev/null; then
+        missing_deps+=("vim")
+    fi
+    
+    if ! command -v git &> /dev/null; then
+        missing_deps+=("git")
+    fi
+    
+    if ! command -v bc &> /dev/null; then
+        log_warning "bc command not found - some tests may be skipped"
+    fi
+    
+    if [[ ${#missing_deps[@]} -gt 0 ]]; then
+        log_error "Missing required dependencies: ${missing_deps[*]}"
+        return 1
+    fi
+    
+    return 0
+}
 
 # Colors for output - use local variables to avoid conflicts
 setup_colors() {
@@ -54,6 +88,7 @@ log_test_result() {
 
 setup_test_environment() {
     log_info "Setting up test environment..."
+    log_info "VIM_CONFIG_DIR: $VIM_CONFIG_DIR"
     
     # Create test directory
     mkdir -p "$TEST_DIR"
@@ -66,10 +101,16 @@ source /tmp/vim_config_test_$$/vim_config/.vimrc
 EOF
     
     # Copy vim config to test directory
+    if [[ ! -d "$VIM_CONFIG_DIR" ]]; then
+        log_error "VIM_CONFIG_DIR does not exist: $VIM_CONFIG_DIR"
+        return 1
+    fi
+    
+    log_info "Copying vim config from $VIM_CONFIG_DIR to $TEST_DIR/vim_config"
     cp -r "$VIM_CONFIG_DIR" ./vim_config
     
     # Initialize git repo for testing git branch functionality
-    git init >/dev/null 2>&1
+    git init > /dev/null 2>&1
     git config user.email "test@example.com"
     git config user.name "Test User"
     
@@ -226,6 +267,12 @@ test_memory_usage() {
 run_all_tests() {
     log_info "Starting Vim configuration performance tests..."
     echo
+    
+    # Check dependencies first
+    if ! check_dependencies; then
+        log_error "Dependency check failed. Please install missing dependencies."
+        return 1
+    fi
     
     setup_test_environment
     

@@ -144,6 +144,7 @@ autocmd BufEnter *
     \ endif
 
 " Only sync syntax when needed and for large files
+" Files larger than 100KB can cause performance issues with syntax highlighting
 autocmd BufEnter * if getfsize(expand('%')) < 100000 && &filetype !=# '' | syntax sync fromstart | endif
 
 " Setting folding method to 'indent'
@@ -176,8 +177,16 @@ endif
 
 " Settings for Coc
 let g:coc_disable_startup_warning = 1
+
+" Check if backspace key should insert tab or delete character
+function! CheckBackspace()
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
 inoremap <silent><expr> <TAB>
       \ coc#pum#visible() ? coc#pum#next(1) :
+      \ CheckBackspace() ? "\<Tab>" :
       \ coc#refresh()
 inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
 inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm(): "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
