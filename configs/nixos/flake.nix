@@ -47,9 +47,7 @@
             rustc
             cargo
             go
-            golang
             nodejs
-            npm
             python3
             python311
             python3Packages.pip
@@ -60,7 +58,7 @@
             pipx
             black
             mypy
-            
+
             # System utilities
             bash-completion
             fzf
@@ -68,38 +66,32 @@
             tree
             btop
             jq
-            grep
-            ncurses
-            pkg-config
-            wl-clipboard
-            
+
             # File managers
             joshuto
             ranger
-            
+
             # Media
             mpv
-            
+
             # Build tools
-            buildPackages
             cmake
             ninja
             gcc
-            
+
             # Docker
             docker
             docker-compose
             docker-buildx
-            
+
             # Kubernetes
             kubectl
-            
+
             # SSH
             openssh
-            
+
             # Security
             cacert
-            truststore
           ];
 
           system.stateVersion = "25.05";
@@ -108,4 +100,3 @@
     };
   };
 }
-
