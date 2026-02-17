@@ -7,105 +7,45 @@
   };
 
   outputs = { self, nixpkgs, nixos-wsl, ... }:
-  let
-    system = "x86_64-linux";
-  in
-  {
-    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-      inherit system;
+    let
+      system = "x86_64-linux";
+    in
+    {
+      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+        inherit system;
 
-      modules = [
-        nixos-wsl.nixosModules.default
+        modules = [
+          nixos-wsl.nixosModules.default
 
-        ({ pkgs, ... }: {
+          ({ pkgs, ... }: {
+            wsl.enable = true;
+            wsl.defaultUser = "nixos";
 
-          # Enable WSL
-          wsl.enable = true;
-          wsl.defaultUser = "nixos";
+            nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-          # Enable flakes
-          nix.settings.experimental-features = [ "nix-command" "flakes" ];
+            users.users.nixos = {
+              isNormalUser = true;
+              extraGroups = [ "wheel" ];
+              shell = pkgs.bash;
+            };
 
-          # User
-          users.users.nixos = {
-            isNormalUser = true;
-            extraGroups = [ "wheel" ];
-            shell = pkgs.bash;
-          };
+            security.sudo.wheelNeedsPassword = false;
 
-          security.sudo.wheelNeedsPassword = false;
+            environment.systemPackages = with pkgs; [
+              git git-filter-repo vim neovim curl wget rustc cargo go nodejs ollama
+              python3 python311 python3Packages.pip python3Packages.httpx
+              python3Packages.jinja2 python3Packages.requests python3Packages.tkinter
+              pipx black mypy bash-completion fzf tmux tree btop jq joshuto ranger
+              mpv cmake ninja gcc docker docker-compose docker-buildx kubectl
+              openssh cacert
+            ];
 
-          # Packages
-          environment.systemPackages = with pkgs; [
-            # Development tools
-            git
-            git-filter-repo
-            vim
-            neovim
-            curl
-            wget
-            rustc
-            cargo
-            go
-            golang
-            nodejs
-            npm
-            python3
-            python311
-            python3Packages.pip
-            python3Packages.httpx
-            python3Packages.jinja2
-            python3Packages.requests
-            python3Packages.tkinter
-            pipx
-            black
-            mypy
-            
-            # System utilities
-            bash-completion
-            fzf
-            tmux
-            tree
-            btop
-            jq
-            grep
-            ncurses
-            pkg-config
-            wl-clipboard
-            
-            # File managers
-            joshuto
-            ranger
-            
-            # Media
-            mpv
-            
-            # Build tools
-            buildPackages
-            cmake
-            ninja
-            gcc
-            
-            # Docker
-            docker
-            docker-compose
-            docker-buildx
-            
-            # Kubernetes
-            kubectl
-            
-            # SSH
-            openssh
-            
-            # Security
-            cacert
-            truststore
-          ];
+            virtualisation.docker.enable = true;
+            virtualisation.docker.liveRestore = false;
 
-          system.stateVersion = "25.05";
-        })
-      ];
+            system.stateVersion = "25.05";
+          })
+        ];
+      };
     };
-  };
 }
-
