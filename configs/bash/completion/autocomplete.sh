@@ -11,9 +11,11 @@
 #
 # Cache Location: $HOME/.cache/bash-smart-complete/
 
+# Optimize loading - only set up if not already loaded
 if [[ -z "$_BASH_SMART_COMPLETE_LOADED" ]]; then
     _BASH_SMART_COMPLETE_LOADED=1
 
+    # Only initialize cache directory if needed
     _smart_cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/bash-smart-complete"
     _smart_cache_ttl=86400  # 24 hours
 
@@ -155,27 +157,41 @@ if [[ -z "$_BASH_SMART_COMPLETE_LOADED" ]]; then
     }
 
     # ========================================================================
-    # Register Completions
+    # Register Completions (optimized)
     # ========================================================================
-    # Apply universal completion to all commands via -D flag
-    complete -o default -o bashdefault -F _smart_complete -D
+    # Only apply universal completion if not already set
+    if [[ -z "$_BASH_SMART_COMPLETE_REGISTERED" ]]; then
+        # Apply universal completion to all commands via -D flag
+        complete -o default -o bashdefault -F _smart_complete -D
+        export _BASH_SMART_COMPLETE_REGISTERED=1
+    fi
 
     # Load enhanced Git completion if available (overrides -D default)
-    if [[ -f "$BASH_CONFIG_DIR/completion/completions/git.sh" ]]; then
-        source "$BASH_CONFIG_DIR/completion/completions/git.sh"
-    elif [[ -f "$BASH_CONFIG_DIR/completion/git-completion/main.sh" ]]; then
-        source "$BASH_CONFIG_DIR/completion/git-completion/main.sh"
-    else
-        complete -o bashdefault -F _smart_git_complete git
+    # Only load once to avoid redundant sourcing
+    if [[ -z "$_GIT_COMPLETION_LOADED" ]]; then
+        if [[ -f "$BASH_CONFIG_DIR/completion/completions/git.sh" ]]; then
+            source "$BASH_CONFIG_DIR/completion/completions/git.sh"
+            export _GIT_COMPLETION_LOADED=1
+        elif [[ -f "$BASH_CONFIG_DIR/completion/git-completion/main.sh" ]]; then
+            source "$BASH_CONFIG_DIR/completion/git-completion/main.sh"
+            export _GIT_COMPLETION_LOADED=1
+        else
+            complete -o bashdefault -F _smart_git_complete git
+        fi
     fi
 
-    # Load Docker completion if available
-    if [[ -f "$BASH_CONFIG_DIR/completion/completions/docker.sh" ]]; then
-        source "$BASH_CONFIG_DIR/completion/completions/docker.sh"
-    elif [[ -f "$BASH_CONFIG_DIR/completion/docker-completion/main.sh" ]]; then
-        source "$BASH_CONFIG_DIR/completion/docker-completion/main.sh"
-    elif [[ -f "$BASH_CONFIG_DIR/completion/docker-completion.sh" ]]; then
-        source "$BASH_CONFIG_DIR/completion/docker-completion.sh"
+    # Load Docker completion if available (only load once)
+    if [[ -z "$_DOCKER_COMPLETION_LOADED" ]]; then
+        if [[ -f "$BASH_CONFIG_DIR/completion/completions/docker.sh" ]]; then
+            source "$BASH_CONFIG_DIR/completion/completions/docker.sh"
+            export _DOCKER_COMPLETION_LOADED=1
+        elif [[ -f "$BASH_CONFIG_DIR/completion/docker-completion/main.sh" ]]; then
+            source "$BASH_CONFIG_DIR/completion/docker-completion/main.sh"
+            export _DOCKER_COMPLETION_LOADED=1
+        elif [[ -f "$BASH_CONFIG_DIR/completion/docker-completion.sh" ]]; then
+            source "$BASH_CONFIG_DIR/completion/docker-completion.sh"
+            export _DOCKER_COMPLETION_LOADED=1
+        fi
     fi
 
-fi
+fi  # End of _BASH_SMART_COMPLETE_LOADED check

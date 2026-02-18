@@ -1,7 +1,53 @@
 #!/bin/bash
 
-# Get current git branch name
+# Git caching variables to reduce repeated calls
+__GIT_CACHE_DIR=""
+__GIT_CACHE_BRANCH=""
+__GIT_CACHE_STATUS=""
+__GIT_CACHE_WORKING_STATUS=""
+__GIT_CACHE_USER_NAME=""
+__GIT_CACHE_USER_EMAIL=""
+__GIT_CACHE_TIMESTAMP=0
+__GIT_CACHE_TTL=5  # Cache for 5 seconds
+
+# Check if cache is valid
+_is_git_cache_valid() {
+    local current_time=$(date +%s)
+    [[ $((current_time - __GIT_CACHE_TIMESTAMP)) -lt $__GIT_CACHE_TTL ]]
+}
+
+# Update git cache with current directory info
+_update_git_cache() {
+    __GIT_CACHE_DIR=$(git rev-parse --git-dir 2>/dev/null)
+    __GIT_CACHE_TIMESTAMP=$(date +%s)
+    
+    if [[ -n "$__GIT_CACHE_DIR" ]]; then
+        # Cache all git info at once
+        __GIT_CACHE_BRANCH=$(get_git_branch_uncached)
+        __GIT_CACHE_STATUS=$(get_git_status_uncached)
+        __GIT_CACHE_WORKING_STATUS=$(get_git_working_status_uncached)
+        __GIT_CACHE_USER_NAME=$(git config user.name 2>/dev/null)
+        __GIT_CACHE_USER_EMAIL=$(git config user.email 2>/dev/null)
+    else
+        # Clear cache if not in git repo
+        __GIT_CACHE_BRANCH=""
+        __GIT_CACHE_STATUS=""
+        __GIT_CACHE_WORKING_STATUS=""
+        __GIT_CACHE_USER_NAME=""
+        __GIT_CACHE_USER_EMAIL=""
+    fi
+}
+
+# Get current git branch name (cached)
 get_git_branch() {
+    if ! _is_git_cache_valid; then
+        _update_git_cache
+    fi
+    echo "$__GIT_CACHE_BRANCH"
+}
+
+# Uncached version for internal use
+get_git_branch_uncached() {
     local branch
     if branch=$(git symbolic-ref --short HEAD 2>/dev/null); then
         echo "$branch"
@@ -21,8 +67,16 @@ is_git_detached() {
     ! git symbolic-ref HEAD &>/dev/null
 }
 
-# Get git status (ahead/behind)
+# Get git status (ahead/behind) (cached)
 get_git_status() {
+    if ! _is_git_cache_valid; then
+        _update_git_cache
+    fi
+    echo "$__GIT_CACHE_STATUS"
+}
+
+# Uncached version for internal use
+get_git_status_uncached() {
     local ahead=0
     local behind=0
     
@@ -50,8 +104,16 @@ has_git_changes() {
     ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null
 }
 
-# Get detailed git working directory status
+# Get detailed git working directory status (cached)
 get_git_working_status() {
+    if ! _is_git_cache_valid; then
+        _update_git_cache
+    fi
+    echo "$__GIT_CACHE_WORKING_STATUS"
+}
+
+# Uncached version for internal use
+get_git_working_status_uncached() {
     local staged=0
     local unstaged=0
     local untracked=0
@@ -73,19 +135,28 @@ get_git_working_status() {
     echo "$staged $unstaged $untracked"
 }
 
-# Get git user name
+# Get git user name (cached)
 get_git_user_name() {
-    git config user.name 2>/dev/null
+    if ! _is_git_cache_valid; then
+        _update_git_cache
+    fi
+    echo "$__GIT_CACHE_USER_NAME"
 }
 
-# Get git user email
+# Get git user email (cached)
 get_git_user_email() {
-    git config user.email 2>/dev/null
+    if ! _is_git_cache_valid; then
+        _update_git_cache
+    fi
+    echo "$__GIT_CACHE_USER_EMAIL"
 }
 
-# Check if current directory is in a git repository
+# Check if current directory is in a git repository (cached)
 is_git_repo() {
-    git rev-parse --git-dir >/dev/null 2>&1
+    if ! _is_git_cache_valid; then
+        _update_git_cache
+    fi
+    [[ -n "$__GIT_CACHE_DIR" ]]
 }
 
 # Get git root directory

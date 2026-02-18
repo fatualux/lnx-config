@@ -1,73 +1,13 @@
 #!/bin/bash
 
-# Source logger with multiple fallback paths and guard against re-sourcing
-if [[ -z "$__LOGGER_SOURCED" ]]; then
-    _source_logger() {
-        local logger_paths=(
-            "${BASH_SOURCE%/*}/logger.sh"
-            "$(dirname "${BASH_SOURCE[0]}")/logger.sh"
-            "$HOME/.config/bash/logger.sh"
-            "$HOME/.bashrc.d/logger.sh"
-            "/etc/bash/logger.sh"
-            "./logger.sh"
-        )
-        
-        for path in "${logger_paths[@]}"; do
-            if [ -f "$path" ]; then
-                source "$path"
-                return 0
-            fi
-        done
-        
-        # Fallback: create stub functions if logger not found
-        echo "Warning: logger.sh not found in standard paths. Logging disabled." >&2
-        log_func_start() { :; }
-        log_func_end() { :; }
-        log_debug() { :; }
-        log_info() { echo "$@"; }
-        log_warn() { echo "Warning: $@" >&2; }
-        log_error() { echo "Error: $@" >&2; }
-        log_docker_starting() { echo "Starting Docker..."; }
-        log_docker_started() { echo "[OK] Docker started successfully"; }
-        log_docker_failed() { echo "[X] Docker failed to start" >&2; }
-        log_docker_running() { echo "[OK] Docker is running"; }
-        log_docker_not_running() { echo "[!] Docker is not running"; }
-        log_progress() { printf "$@"; }
-        log_clear_line() { printf "\r\033[K"; }
-        log_cmd() { :; }
-        return 1
-    }
-    
-    _source_logger
+# Optimize logger sourcing - check if already available first
+if [[ -z "$__LOGGER_SOURCED" ]] && [[ -f "$BASH_CONFIG_DIR/core/logger.sh" ]]; then
+    source "$BASH_CONFIG_DIR/core/logger.sh"
 fi
 
-# Source spinner utilities
-if [[ -z "$__SPINNER_SOURCED" ]]; then
-    _source_spinner() {
-        local spinner_paths=(
-            "${BASH_SOURCE%/*}/spinner.sh"
-            "$(dirname "${BASH_SOURCE[0]}")/spinner.sh"
-            "$HOME/.config/bash/spinner.sh"
-            "$HOME/.bashrc.d/spinner.sh"
-            "/etc/bash/spinner.sh"
-            "./spinner.sh"
-        )
-        
-        for path in "${spinner_paths[@]}"; do
-            if [ -f "$path" ]; then
-                source "$path"
-                return 0
-            fi
-        done
-        
-        # Fallback stub functions
-        spinner_start() { :; }
-        spinner_stop() { :; }
-        spinner_task() { eval "$2" >/dev/null 2>&1; }
-        return 1
-    }
-    
-    _source_spinner
+# Optimize spinner sourcing - check if already available first  
+if [[ -z "$__SPINNER_SOURCED" ]] && [[ -f "$BASH_CONFIG_DIR/core/spinner.sh" ]]; then
+    source "$BASH_CONFIG_DIR/core/spinner.sh"
 fi
 
 start_docker() {
@@ -137,5 +77,9 @@ docker_manager() {
   log_func_end "docker_manager"
 }
 
-log_info "Initializing Docker manager"
-docker_manager
+# Only initialize Docker manager if not already running and command exists
+if command -v docker &>/dev/null && [[ -z "$DOCKER_MANAGER_INITIALIZED" ]]; then
+    log_info "Initializing Docker manager"
+    docker_manager
+    export DOCKER_MANAGER_INITIALIZED=1
+fi
