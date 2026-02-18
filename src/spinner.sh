@@ -202,17 +202,24 @@ spinner_task() {
 	local exit_code=0
 	"${cmd[@]}" &>/dev/null || exit_code=$?
 	
-	# Stop spinner
+	# Stop spinner and clear line before showing result
 	rm -f "$SPINNER_PID_FILE"
 	kill "$spinner_pid" 2>/dev/null || true
 	wait "$spinner_pid" 2>/dev/null || true
+	unset SPINNER_PID_FILE
 	
-	# Show final result
+	# Clear the spinner line completely
+	printf "\r${CLEAR_LINE}"
+	
+	# Restore cursor
+	tput cnorm 2>/dev/null || true
+	
+	# Show final result on a clean line
 	if [[ $exit_code -eq 0 ]]; then
-		printf "\r${COLOR_BOLD_GREEN}✔${NC}  ${task_name}${CLEAR_LINE}\n"
+		printf "${COLOR_BOLD_GREEN}✔${NC}  ${task_name}\n"
 		((SPINNER_TASK_SUCCESS++))
 	else
-		printf "\r${COLOR_BOLD_RED}✗${NC}  ${task_name}${CLEAR_LINE}\n"
+		printf "${COLOR_BOLD_RED}✗${NC}  ${task_name}\n"
 		((SPINNER_TASK_FAILED++))
 	fi
 	

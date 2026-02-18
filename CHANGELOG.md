@@ -40,6 +40,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Fixed colors.sh and logger.sh duplication**: Made `/src/` the single source of truth for all core bash files
 - Copied improved bash-specific versions from configs to src, then removed duplicates from configs
 - Now all core files (spinner.sh, colors.sh, logger.sh) are maintained only in `/src/` and propagated by installer
+- **Fixed spinner line clearing**: Spinner characters now properly clear after task completion
+- Added proper line clearing and cursor restoration to spinner_task function
+- Eliminated leftover spinner characters in output after process completion
 - Made vim performance test paths configurable via environment variables
 - Added cache cleanup mechanism to git branch cache to prevent memory leaks
 - Added cache size limits (50 entries max) to prevent memory growth
