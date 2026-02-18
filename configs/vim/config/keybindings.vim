@@ -19,4 +19,4 @@ map <C-z> :Codeium Disable<CR>
 map <C-u> :Codeium Chat<CR>
 map <zz> :q! <CR>
 " Two-letter shortcut to quit all without saving
-map <qq> :q! <CR>
+map <alt-q> :q! <CR>
