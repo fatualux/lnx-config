@@ -81,11 +81,12 @@ spinner_start() {
 	local frames=("${FRAME[@]}")
 	local interval="$FRAME_INTERVAL"
 	
-	# Hide cursor
+	# Hide cursor and disable job control messages
 	tput civis 2>/dev/null || true
+	set +m 2>/dev/null || true  # Disable job control messages
 	
 	# Background spinner process
-	(
+	{
 		while [[ -f "$SPINNER_PID_FILE" ]]; do
 			for frame in "${frames[@]}"; do
 				[[ ! -f "$SPINNER_PID_FILE" ]] && break
@@ -96,7 +97,7 @@ spinner_start() {
 		done
 		# Clear the line when done
 		printf "\r${CLEAR_LINE}"
-	) &
+	} &
 	
 	local spinner_pid=$!
 	echo "$spinner_pid" > "$SPINNER_PID_FILE"
@@ -123,8 +124,9 @@ spinner_stop() {
 		unset SPINNER_PID_FILE
 	fi
 	
-	# Show cursor
+	# Show cursor and restore job control
 	tput cnorm 2>/dev/null || true
+	set -m 2>/dev/null || true  # Re-enable job control messages
 	
 	# Print completion message
 	if [[ $exit_code -eq 0 ]]; then
@@ -211,8 +213,9 @@ spinner_task() {
 	# Clear the spinner line completely
 	printf "\r${CLEAR_LINE}"
 	
-	# Restore cursor
+	# Restore cursor and job control
 	tput cnorm 2>/dev/null || true
+	set -m 2>/dev/null || true  # Re-enable job control messages
 	
 	# Show final result on a clean line
 	if [[ $exit_code -eq 0 ]]; then
@@ -250,6 +253,7 @@ spinner_cleanup() {
 		unset SPINNER_PID_FILE
 	fi
 	tput cnorm 2>/dev/null || true
+	set -m 2>/dev/null || true  # Re-enable job control messages
 }
 
 # Set up cleanup trap

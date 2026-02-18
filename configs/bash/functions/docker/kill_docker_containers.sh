@@ -26,7 +26,7 @@ kill_docker_containers() {
 		
 		# Use spinner for visual feedback while processing each container
 		spinner_start "Stopping and removing container ($current/$container_count)"
-		docker stop "$container" && docker rm "$container"
+		docker stop "$container" >/dev/null 2>&1 && docker rm "$container" >/dev/null 2>&1
 		local exit_code=$?
 		
 		if [ $exit_code -eq 0 ]; then

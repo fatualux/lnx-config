@@ -43,6 +43,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Fixed spinner line clearing**: Spinner characters now properly clear after task completion
 - Added proper line clearing and cursor restoration to spinner_task function
 - Eliminated leftover spinner characters in output after process completion
+- **Fixed background job control messages**: Suppressed `[job] PID` messages from spinner background processes
+- Added `set +m` to disable job control messages during spinner operation
+- Properly restored job control with `set -m` after spinner completion
+- Now Docker container removal and other spinner operations show clean output without PIDs
 - Made vim performance test paths configurable via environment variables
 - Added cache cleanup mechanism to git branch cache to prevent memory leaks
 - Added cache size limits (50 entries max) to prevent memory growth
