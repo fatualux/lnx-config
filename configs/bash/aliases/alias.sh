@@ -5,6 +5,7 @@ alias python="python3"
 alias hh="vim $HISTFILE"
 alias cdd="code ."
 alias dkl="docker logs -f"
+alias ds="docker system info"
 alias c="clear"
 
 # Custom Function Aliases

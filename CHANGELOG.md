@@ -31,3 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved error handling and dependency checking in performance tests
 - Documented magic numbers with explanatory comments for better maintainability
 - Changed `safe_spinner_stop` to `spinner_stop` in nixos.sh
+- **Critical**: Fixed Docker startup hanging forever on NixOS WSL by enabling Docker service in NixOS configuration
+- Added virtualisation.docker.enable = true to NixOS flake configuration
+- Added user to docker group for proper permissions
+- Fixed Docker integration script to use sudo for daemon startup
+- Simplified Docker socket configuration for WSL compatibility

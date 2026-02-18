@@ -78,10 +78,10 @@ start_docker() {
   INTERVAL=0.2
   START_TIME=$(date +%s)
 
-  log_debug "Starting dockerd with TCP and Unix socket"
-  log_cmd "nohup dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock"
+  log_debug "Starting dockerd with Unix socket"
+  log_cmd "sudo dockerd -H unix:///var/run/docker.sock"
   
-  nohup dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock >~/dockerd.log 2>&1 &
+  sudo dockerd -H unix:///var/run/docker.sock >~/dockerd.log 2>&1 &
   local dockerd_pid=$!
   log_debug "Docker daemon PID: $dockerd_pid"
 

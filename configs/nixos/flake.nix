@@ -29,11 +29,18 @@
           # User
           users.users.nixos = {
             isNormalUser = true;
-            extraGroups = [ "wheel" ];
+            extraGroups = [ "wheel" "docker" ];
             shell = pkgs.bash;
           };
 
           security.sudo.wheelNeedsPassword = false;
+
+          # Enable Docker service
+          virtualisation.docker.enable = true;
+          virtualisation.docker.enableOnBoot = false;
+          virtualisation.docker.daemon.settings = {
+            "hosts" = ["unix:///var/run/docker.sock"];
+          };
 
           # Packages
           environment.systemPackages = with pkgs; [
