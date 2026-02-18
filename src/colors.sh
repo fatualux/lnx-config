@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Guard against re-sourcing to prevent readonly variable conflicts
-[[ -n "$__COLORS_SOURCED" ]] && return 0
-
 # Colors module - centralized color definitions for bash configuration
 # Usage: source this file to access color variables
+
+# Guard against re-sourcing to prevent readonly variable conflicts
+[[ -n "${__COLORS_SOURCED:-}" ]] && return 0
 
 # Regular Colors
 readonly COLOR_BLACK='\033[0;30m'

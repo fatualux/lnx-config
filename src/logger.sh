@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Guard against re-sourcing to prevent readonly variable conflicts
-[[ -n "$__LOGGER_SOURCED" ]] && return 0
+[[ -n "${__LOGGER_SOURCED:-}" ]] && return 0
 
 # Logger module - centralized logging system for bash configuration
 # Usage: source this file after sourcing colors.sh
