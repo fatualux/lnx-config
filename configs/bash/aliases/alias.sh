@@ -30,4 +30,4 @@ alias tree='git log --graph --decorate --all --oneline'
 alias lg='git log --graph --date=format:"%Y-%m-%d %H:%M" --pretty=format:"%C(Yellow)%h %Cgreen%aN %C(cyan)%ad%Creset %s %C(auto)%d"'
 alias clean-branches='git branch | grep -v main | xargs git branch -D'
 alias st='git status'
-alias co='git checkout'
+alias co="checkout"
