@@ -13,7 +13,7 @@ set_spinner() {
 	case $1 in
 		spinner1|default)
 			# Larger dots with smooth animation - more visible
-			FRAME=("⣾" "⣽" "⣻" "⢿" "⡿" "⣟" "⣯" "⣷")
+			FRAME=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
 			FRAME_INTERVAL=0.08
 			;;
 		spinner2)
@@ -53,12 +53,12 @@ set_spinner() {
 			;;
 		dots)
 			# Bold dots (same as default now)
-			FRAME=("⣾" "⣽" "⣻" "⢿" "⡿" "⣟" "⣯" "⣷")
+			FRAME=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
 			FRAME_INTERVAL=0.08
 			;;
 		*)
 			# Default to bold dots
-			FRAME=("⣾" "⣽" "⣻" "⢿" "⡿" "⣟" "⣯" "⣷")
+			FRAME=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
 			FRAME_INTERVAL=0.08
 			;;
 	esac
