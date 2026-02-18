@@ -72,12 +72,22 @@ create_required_directories() {
 	
 	log_info "Ensuring configuration files are copied"
 	
-	# Copy bash configs
-	if [[ -d "$project_configs/bash" ]]; then
-		rsync -av --ignore-existing "$project_configs/bash/" "$install_dir/configs/bash/" 2>/dev/null || {
-			log_debug "rsync failed for bash, trying cp"
-			cp -rn "$project_configs/bash"/* "$install_dir/configs/bash/" 2>/dev/null || true
+	# Copy bash configs from src (single source of truth)
+	if [[ -d "$SCRIPT_DIR/configs/bash" ]]; then
+		# First copy main configs
+		rsync -av --ignore-existing "$SCRIPT_DIR/configs/bash/" "$install_dir/configs/bash/" 2>/dev/null || {
+			log_debug "rsync failed for bash configs, trying cp"
+			cp -rn "$SCRIPT_DIR/configs/bash"/* "$install_dir/configs/bash/" 2>/dev/null || true
 		}
+		
+		# Then copy core files from src (overwrites if different)
+		if [[ -d "$SRC_DIR" ]]; then
+			log_info "Copying core bash files from src (single source of truth)"
+			# Copy core files from src to configs/bash/core
+			mkdir -p "$install_dir/configs/bash/core"
+			cp -rf "$SRC_DIR"/*.sh "$install_dir/configs/bash/core/" 2>/dev/null || true
+		fi
+		
 		log_debug "Bash configuration files ensured"
 	fi
 	
