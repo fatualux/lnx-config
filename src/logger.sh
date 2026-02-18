@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Guard against re-sourcing to prevent readonly variable conflicts
-[[ -n "${__LOGGER_SOURCED:-}" ]] && return 0
+[[ -n "$__LOGGER_SOURCED" ]] && return 0
 
 # Logger module - centralized logging system for bash configuration
 # Usage: source this file after sourcing colors.sh
@@ -66,6 +66,20 @@ readonly LOG_LEVEL_CRITICAL=5
 # Default log level (INFO)
 : "${LOG_LEVEL:=1}"
 
+# Normalize LOG_LEVEL if it's not a number (e.g., from .env files)
+if ! [[ "$LOG_LEVEL" =~ ^[0-9]+$ ]]; then
+    # Try to convert string level names to numbers
+    case "${LOG_LEVEL^^}" in
+        DEBUG) LOG_LEVEL=0 ;;
+        INFO) LOG_LEVEL=1 ;;
+        SUCCESS) LOG_LEVEL=2 ;;
+        WARNING|WARN) LOG_LEVEL=3 ;;
+        ERROR) LOG_LEVEL=4 ;;
+        CRITICAL|CRIT) LOG_LEVEL=5 ;;
+        *) LOG_LEVEL=1 ;;  # Default to INFO for unknown values
+    esac
+fi
+
 # Enable/disable logging to file
 : "${LOG_TO_FILE:=false}"
 : "${LOG_FILE:=$HOME/.bash_config.log}"
@@ -93,7 +107,14 @@ _write_to_file() {
 # Internal function to check if message should be logged
 _should_log() {
     local level=$1
-    [ "$level" -ge "$LOG_LEVEL" ]
+    local current_log_level="$LOG_LEVEL"
+    
+    # If LOG_LEVEL is not a number, reset to default (INFO)
+    if ! [[ "$current_log_level" =~ ^[0-9]+$ ]]; then
+        current_log_level=1
+    fi
+    
+    [ "$level" -ge "$current_log_level" ]
 }
 
 # Debug log - detailed information for debugging
@@ -277,7 +298,7 @@ log_prompt() {
 
 # Print a separator line
 log_separator() {
-    printf "${COLOR_DIM}%80s${NC}\n" | tr ' ' '-'
+    echo -e "${COLOR_DIM}$(printf '%0.s-' {1..80})${NC}"
 }
 
 # Print current log level
