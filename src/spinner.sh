@@ -53,12 +53,12 @@ set_spinner() {
 			;;
 		dots)
 			# Bold dots (same as default now)
-			FRAME=("⣾" "⣽" "⣻" "⢿" "⡿" "⣟" "⣯" "⣷")
+			FRAME=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
 			FRAME_INTERVAL=0.08
 			;;
 		*)
 			# Default to bold dots
-			FRAME=("⣾" "⣽" "⣻" "⢿" "⡿" "⣟" "⣯" "⣷")
+			FRAME=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
 			FRAME_INTERVAL=0.08
 			;;
 	esac
@@ -183,7 +183,7 @@ spinner_task() {
 	((SPINNER_TASK_COUNT++))
 	
 	# Set up spinner frames
-	local frames=("⣾" "⣽" "⣻" "⢿" "⡿" "⣟" "⣯" "⣷")
+	local frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
 	local interval=0.08
 	
 	# Start animated spinner in background

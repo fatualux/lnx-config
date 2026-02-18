@@ -15,6 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed duplicate vim-plug installation between general.vim and plugins.vim
 - Added silent vim-plug installation to reduce startup noise
 - Optimized working directory changes to only occur when directory actually changes
+- **Major bash startup performance optimizations:**
+  - Batched file sourcing operations to reduce filesystem calls
+  - Added 5-second caching to all git operations in prompt
+  - Optimized rainbow theme with IP address caching (5-minute TTL)
+  - Reduced external command calls in prompt generation
+  - Fixed logger sourcing overhead in integration files
+  - Removed sleep/clear commands from startup sequence
+  - Optimized completion system to prevent redundant loading
+  - Fixed rainbow theme color escape sequences for proper display
 
 ### Added
 - Comprehensive vim performance test suite (`tests/test_vim_performance.sh`)
@@ -31,3 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved error handling and dependency checking in performance tests
 - Documented magic numbers with explanatory comments for better maintainability
 - Changed `safe_spinner_stop` to `spinner_stop` in nixos.sh
+- **Critical**: Fixed Docker startup hanging forever on NixOS WSL by enabling Docker service in NixOS configuration
+- Added virtualisation.docker.enable = true to NixOS flake configuration
+- Added user to docker group for proper permissions
+- Fixed Docker integration script to use sudo for daemon startup
+- Simplified Docker socket configuration for WSL compatibility

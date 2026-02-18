@@ -29,7 +29,7 @@
               shell = pkgs.bash;
             };
 
-            security.sudo.wheelNeedsPassword = false;
+security.sudo.wheelNeedsPassword = false;
 
             environment.systemPackages = with pkgs; [
               git git-filter-repo vim neovim curl wget rustc cargo go nodejs ollama
@@ -40,7 +40,7 @@
               openssh cacert
             ];
 
-            virtualisation.docker.enable = true;
+virtualisation.docker.enable = true;
             virtualisation.docker.liveRestore = false;
 
             system.stateVersion = "25.05";

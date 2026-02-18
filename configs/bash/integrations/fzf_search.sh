@@ -1,35 +1,8 @@
 #!/bin/bash
 
-# Source logger with multiple fallback paths and guard against re-sourcing
-if [[ -z "$__LOGGER_SOURCED" ]]; then
-    _source_logger() {
-        local logger_paths=(
-            "${BASH_SOURCE%/*}/logger.sh"
-            "$(dirname "${BASH_SOURCE[0]}")/logger.sh"
-            "$HOME/.config/bash/logger.sh"
-            "$HOME/.bashrc.d/logger.sh"
-            "/etc/bash/logger.sh"
-            "./logger.sh"
-        )
-        
-        for path in "${logger_paths[@]}"; do
-            if [ -f "$path" ]; then
-                source "$path"
-                return 0
-            fi
-        done
-        
-        # Fallback: create stub functions if logger not found
-        echo "Warning: logger.sh not found in standard paths. Logging disabled." >&2
-        log_func_start() { :; }
-        log_func_end() { :; }
-        log_debug() { :; }
-        log_info() { echo "$@"; }
-        log_warn() { echo "Warning: $@" >&2; }
-        return 1
-    }
-    
-    _source_logger
+# Optimize logger sourcing - check if already available first
+if [[ -z "$__LOGGER_SOURCED" ]] && [[ -f "$BASH_CONFIG_DIR/core/logger.sh" ]]; then
+    source "$BASH_CONFIG_DIR/core/logger.sh"
 fi
 
 # --- Clean & Deduplicate on Exit ---
@@ -83,12 +56,13 @@ fzf_history_search() {
   log_func_end "fzf_history_search"
 }
 
-# --- Bind Ctrl-R to fzf (interactive shells only) ---
-if [[ $- == *i* ]]; then
-  log_debug "Configuring fzf history search for interactive shell"
-  # Unbind any previous Ctrl-R
-  bind -r "\C-r" 2>/dev/null
-  # Bind our custom widget
-  bind -x '"\C-r": fzf_history_search'
-  log_info "fzf history search enabled (Ctrl-R)"
+# Only bind fzf history search for interactive shells if fzf is available
+if [[ $- == *i* ]] && command -v fzf >/dev/null 2>&1 && [[ -z "$FZF_HISTORY_BOUND" ]]; then
+    log_debug "Configuring fzf history search for interactive shell"
+    # Unbind any previous Ctrl-R
+    bind -r "\C-r" 2>/dev/null
+    # Bind our custom widget
+    bind -x '"\C-r": fzf_history_search'
+    log_info "fzf history search enabled (Ctrl-R)"
+    export FZF_HISTORY_BOUND=1
 fi

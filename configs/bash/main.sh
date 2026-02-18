@@ -16,112 +16,94 @@ else
 # 1. CORE UTILITIES (logger, spinner, colors)
 #═══════════════════════════════════════════════════════════════════════════════
 
-# Source logger (with fallback protection)
-if [[ -z "$__LOGGER_SOURCED" ]]; then
-    if [ -f "$BASH_CONFIG_DIR/core/logger.sh" ]; then
-        source "$BASH_CONFIG_DIR/core/logger.sh"
-    fi
-fi
-
-# Source spinner utilities
-if [[ -z "$__SPINNER_SOURCED" ]]; then
-    if [ -f "$BASH_CONFIG_DIR/core/spinner.sh" ]; then
-        source "$BASH_CONFIG_DIR/core/spinner.sh"
-    fi
-fi
-
-# Source color definitions
-if [ -f "$BASH_CONFIG_DIR/core/colors.sh" ]; then
-    source "$BASH_CONFIG_DIR/core/colors.sh"
-fi
+# Batch source core utilities to reduce file system calls
+_source_core_files() {
+    local core_dir="$BASH_CONFIG_DIR/core"
+    [[ -f "$core_dir/logger.sh" ]] && source "$core_dir/logger.sh"
+    [[ -f "$core_dir/spinner.sh" ]] && source "$core_dir/spinner.sh"
+    [[ -f "$core_dir/colors.sh" ]] && source "$core_dir/colors.sh"
+}
+_source_core_files
 
 #═══════════════════════════════════════════════════════════════════════════════
 # 2. CONFIGURATION FILES (env_vars, history, init)
 #═══════════════════════════════════════════════════════════════════════════════
 
-for config_file in "$BASH_CONFIG_DIR/config"/*.sh; do
-    if [ -f "$config_file" ]; then
-        source "$config_file"
-    fi
-done
+# Batch source configuration files
+_source_config_files() {
+    local config_dir="$BASH_CONFIG_DIR/config"
+    for config_file in "$config_dir"/*.sh; do
+        [[ -f "$config_file" ]] && source "$config_file"
+    done
+}
+_source_config_files
 
 #═══════════════════════════════════════════════════════════════════════════════
 # 3. FUNCTIONS (organized by category) - MUST LOAD BEFORE ALIASES
 #═══════════════════════════════════════════════════════════════════════════════
 
-# Source filesystem functions
-for func_file in "$BASH_CONFIG_DIR/functions/filesystem"/*.sh; do
-    if [ -f "$func_file" ]; then
-        source "$func_file"
-    fi
-done
-
-# Source Docker functions
-for func_file in "$BASH_CONFIG_DIR/functions/docker"/*.sh; do
-    if [ -f "$func_file" ]; then
-        source "$func_file"
-    fi
-done
-
-# Source music player functions
-for func_file in "$BASH_CONFIG_DIR/functions/music"/*.sh; do
-    if [ -f "$func_file" ]; then
-        source "$func_file"
-    fi
-done
-
-# Source alias utility functions
-for func_file in "$BASH_CONFIG_DIR/functions/aliases"/*.sh; do
-    if [ -f "$func_file" ]; then
-        source "$func_file"
-    fi
-done
-
-# Source development functions
-for func_file in "$BASH_CONFIG_DIR/functions/development"/*.sh; do
-    if [ -f "$func_file" ]; then
-        source "$func_file"
-    fi
-done
+# Batch source function files by category
+_source_function_files() {
+    local func_dir="$BASH_CONFIG_DIR/functions"
+    
+    # Source all function categories in one loop to reduce directory scans
+    for category in filesystem docker music aliases development; do
+        for func_file in "$func_dir/$category"/*.sh; do
+            [[ -f "$func_file" ]] && source "$func_file"
+        done
+    done
+}
+_source_function_files
 
 #═══════════════════════════════════════════════════════════════════════════════
 # 4. ALIASES (general and work-specific) - AFTER FUNCTIONS
 #═══════════════════════════════════════════════════════════════════════════════
 
-for alias_file in "$BASH_CONFIG_DIR/aliases"/*.sh; do
-    if [ -f "$alias_file" ]; then
-        source "$alias_file"
-    fi
-done
+# Batch source alias files
+_source_alias_files() {
+    local alias_dir="$BASH_CONFIG_DIR/aliases"
+    for alias_file in "$alias_dir"/*.sh; do
+        [[ -f "$alias_file" ]] && source "$alias_file"
+    done
+}
+_source_alias_files
 
 #═══════════════════════════════════════════════════════════════════════════════
 # 5. INTEGRATIONS (docker, fzf, cd-activate, mc)
 #═══════════════════════════════════════════════════════════════════════════════
 
-for integration_file in "$BASH_CONFIG_DIR/integrations"/*.sh; do
-    if [ -f "$integration_file" ]; then
-        source "$integration_file"
-    fi
-done
+# Batch source integration files
+_source_integration_files() {
+    local integration_dir="$BASH_CONFIG_DIR/integrations"
+    for integration_file in "$integration_dir"/*.sh; do
+        [[ -f "$integration_file" ]] && source "$integration_file"
+    done
+}
+_source_integration_files
 
 #═══════════════════════════════════════════════════════════════════════════════
 # 6. COMPLETION
 #═══════════════════════════════════════════════════════════════════════════════
 
-for completion_file in "$BASH_CONFIG_DIR/completion"/*.sh; do
-    if [ -f "$completion_file" ]; then
-        source "$completion_file"
-    fi
-done
+# Batch source completion files
+_source_completion_files() {
+    local completion_dir="$BASH_CONFIG_DIR/completion"
+    for completion_file in "$completion_dir"/*.sh; do
+        [[ -f "$completion_file" ]] && source "$completion_file"
+    done
+}
+_source_completion_files
 
 # Mark as loaded
 export __BASH_CONFIG_LOADED=1
 
 # Optional: Display loaded message (comment out if not desired)
 if command -v log_success &> /dev/null; then
-    log_success "Bash configuration loaded from $BASH_CONFIG_DIR"; sleep 0.5 && clear
+    log_success "Bash configuration loaded from $BASH_CONFIG_DIR"
+    clear
 elif [ -n "$BASH_CONFIG_VERBOSE" ]; then
-    echo "✓ Bash configuration loaded successfully"; sleep 0.5 && clear
+    echo "✓ Bash configuration loaded successfully"
+    clear
 fi
 
 fi  # End guard clause
