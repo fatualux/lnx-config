@@ -79,6 +79,3 @@ set_prompt() {
     # Final prompt symbol
     PS1+="\[${C_SYMBOL}\]❯\[${C_RESET}\] "
 }
-
-# Use PROMPT_COMMAND instead of command substitution in PS1
-PROMPT_COMMAND=set_prompt

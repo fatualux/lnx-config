@@ -85,5 +85,3 @@ set_prompt() {
     
     PS1+="\[${C_SYMBOL}\]➜\[${C_RESET}\] "
 }
-
-PROMPT_COMMAND=set_prompt

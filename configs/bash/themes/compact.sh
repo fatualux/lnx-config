@@ -42,5 +42,3 @@ set_prompt() {
     
     PS1+=" \$ "
 }
-
-PROMPT_COMMAND=set_prompt

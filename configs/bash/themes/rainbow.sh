@@ -134,5 +134,3 @@ set_prompt() {
     PS1+="${C_SYMBOL1}└─${C_RESET}"
     PS1+="${C_PROMPT}>${C_RESET} "
 }
-
-PROMPT_COMMAND=set_prompt

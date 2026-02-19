@@ -2,6 +2,25 @@
 
 All notable changes to the lnx-config project are documented here.
 
+## v2.6.8 - 2026-02-19
+### Fixed
+- **Critical history clearing issue** that was unexpectedly clearing bash history
+  - Removed conflicting `__bash_history_cleanup` function from `fzf_search.sh` that was overwriting the main history management
+  - Fixed theme system to preserve history synchronization by chaining PROMPT_COMMANDs properly
+  - Updated installed version in `~/.lnx-config/configs/bash/config/history.sh` to remove problematic `history -c` command
+  - Modified `theme.sh` to create wrapper function that preserves existing PROMPT_COMMAND (history sync) while setting theme
+  - Removed `PROMPT_COMMAND=set_prompt` from all theme files to prevent overwriting history synchronization
+
+- **Enhanced history synchronization reliability**
+  - History sync function now properly preserves in-memory history instead of clearing it
+  - Multi-terminal history sharing works correctly without session loss
+  - Theme system no longer interferes with history management
+
+### Technical Details
+- **Root cause**: Multiple conflicting history management systems were overwriting each other
+- **Solution**: Centralized history management in `history.sh` with proper PROMPT_COMMAND chaining
+- **Impact**: Users will no longer experience unexpected history clearing during shell sessions
+
 ## v2.6.7 - 2026-02-12
 ### Fixed
 - **Critical completion system bugs** identified during code review
