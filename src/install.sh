@@ -72,12 +72,14 @@ create_required_directories() {
 	
 	log_info "Ensuring configuration files are copied"
 	
-	# Copy bash configs from src
-	if [[ -d "$SCRIPT_DIR/configs/bash" ]]; then
+	# Copy bash configs
+	if [[ -d "$project_configs/bash" ]]; then
 		# First copy main configs
-		rsync -av --ignore-existing "$SCRIPT_DIR/configs/bash/" "$install_dir/configs/bash/" 2>/dev/null || {
+		rsync -av --ignore-existing "$project_configs/bash/" "$install_dir/configs/bash/" 2>/dev/null || {
 			log_debug "rsync failed for bash configs, trying cp"
-			cp -rn "$SCRIPT_DIR/configs/bash"/* "$install_dir/configs/bash/" 2>/dev/null || true
+			if ! cp -rn "$project_configs/bash"/* "$install_dir/configs/bash/" 2>/dev/null; then
+				log_warn "Failed to copy bash configuration files"
+			fi
 		}
 		
 		# Then copy core files from src (overwrites if different)
@@ -85,7 +87,9 @@ create_required_directories() {
 			log_info "Copying core bash files from src"
 			# Copy core files from src to configs/bash/core
 			mkdir -p "$install_dir/configs/bash/core"
-			cp -rf "$SRC_DIR"/*.sh "$install_dir/configs/bash/core/" 2>/dev/null || true
+			if ! cp -rf "$SRC_DIR"/*.sh "$install_dir/configs/bash/core/" 2>/dev/null; then
+				log_warn "Failed to copy some core bash files from src"
+			fi
 		fi
 		
 		log_debug "Bash configuration files ensured"
@@ -95,7 +99,9 @@ create_required_directories() {
 	if [[ -d "$project_configs/nvim" ]]; then
 		rsync -av --ignore-existing "$project_configs/nvim/" "$install_dir/configs/nvim/" 2>/dev/null || {
 			log_debug "rsync failed for nvim, trying cp"
-			cp -rn "$project_configs/nvim"/* "$install_dir/configs/nvim/" 2>/dev/null || true
+			if ! cp -rn "$project_configs/nvim"/* "$install_dir/configs/nvim/" 2>/dev/null; then
+				log_warn "Failed to copy nvim configuration files"
+			fi
 		}
 		log_debug "Neovim configuration files ensured"
 	fi
@@ -105,7 +111,9 @@ create_required_directories() {
 		if [[ -d "$project_configs/$config_type" ]]; then
 			rsync -av --ignore-existing "$project_configs/$config_type/" "$install_dir/configs/$config_type/" 2>/dev/null || {
 				log_debug "rsync failed for $config_type, trying cp"
-				cp -rn "$project_configs/$config_type"/* "$install_dir/configs/$config_type/" 2>/dev/null || true
+				if ! cp -rn "$project_configs/$config_type"/* "$install_dir/configs/$config_type/" 2>/dev/null; then
+					log_warn "Failed to copy $config_type configuration files"
+				fi
 			}
 			log_debug "$config_type configuration files ensured"
 		fi

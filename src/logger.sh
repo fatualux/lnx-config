@@ -107,14 +107,7 @@ _write_to_file() {
 # Internal function to check if message should be logged
 _should_log() {
     local level=$1
-    local current_log_level="$LOG_LEVEL"
-    
-    # If LOG_LEVEL is not a number, reset to default (INFO)
-    if ! [[ "$current_log_level" =~ ^[0-9]+$ ]]; then
-        current_log_level=1
-    fi
-    
-    [ "$level" -ge "$current_log_level" ]
+    [ "$level" -ge "$LOG_LEVEL" ]
 }
 
 # Debug log - detailed information for debugging
