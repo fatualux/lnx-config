@@ -13,7 +13,8 @@ set_spinner() {
 	case $1 in
 		spinner1|default)
 			# Larger dots with smooth animation - more visible
-			FRAME=("⣾" "⣽" "⣻" "⢿" "⡿" "⣟" "⣯" "⣷")
+			FRAME=("⢀⠀" "⡀⠀" "⠄⠀" "⢂⠀" "⡂⠀" "⠅⠀" "⢃⠀" "⡃⠀" "⠍⠀" "⢋⠀" "⡋⠀" "⠍⠁" "⢋⠁" "⡋⠁" "⠍⠉" "⠋⠉" "⠋⠉" "⠉⠙" "⠉⠙" "⠉⠩" "⠈⢙" "⠈⡙" "⢈⠩" "⡀⢙" "⠄⡙" "⢂⠩" "⡂⢘" "⠅⡘" "⢃⠨" "⡃⢐" "⠍⡐" "⢋⠠" "⡋⢀" "⠍⡁" "⢋⠁" "⡋⠁" "⠍⠉" "⠋⠉" "⠋⠉" "⠉⠙" "⠉⠙" "⠉⠩" "⠈⢙" "⠈⡙" "⠈⠩" "⠀⢙" "⠀⡙" "⠀⠩" "⠀⢘" "⠀⡘" "⠀⠨" "⠀⢐" "⠀⡐" "⠀⠠" "⠀⢀" "⠀⡀"
+        ])
 			FRAME_INTERVAL=0.08
 			;;
 		spinner2)
@@ -81,11 +82,13 @@ spinner_start() {
 	local frames=("${FRAME[@]}")
 	local interval="$FRAME_INTERVAL"
 	
-	# Hide cursor
+	# Hide cursor and disable job control messages
 	tput civis 2>/dev/null || true
+	# Only disable job control in interactive shells
+	[[ $- == *i* ]] && set +m 2>/dev/null || true
 	
 	# Background spinner process
-	(
+	{
 		while [[ -f "$SPINNER_PID_FILE" ]]; do
 			for frame in "${frames[@]}"; do
 				[[ ! -f "$SPINNER_PID_FILE" ]] && break
@@ -96,7 +99,7 @@ spinner_start() {
 		done
 		# Clear the line when done
 		printf "\r${CLEAR_LINE}"
-	) &
+	} &
 	
 	local spinner_pid=$!
 	echo "$spinner_pid" > "$SPINNER_PID_FILE"
@@ -123,8 +126,10 @@ spinner_stop() {
 		unset SPINNER_PID_FILE
 	fi
 	
-	# Show cursor
+	# Show cursor and restore job control
 	tput cnorm 2>/dev/null || true
+	# Only re-enable job control in interactive shells
+	[[ $- == *i* ]] && set -m 2>/dev/null || true
 	
 	# Print completion message
 	if [[ $exit_code -eq 0 ]]; then
@@ -202,17 +207,26 @@ spinner_task() {
 	local exit_code=0
 	"${cmd[@]}" &>/dev/null || exit_code=$?
 	
-	# Stop spinner
+	# Stop spinner and clear line before showing result
 	rm -f "$SPINNER_PID_FILE"
 	kill "$spinner_pid" 2>/dev/null || true
 	wait "$spinner_pid" 2>/dev/null || true
+	unset SPINNER_PID_FILE
 	
-	# Show final result
+	# Clear the spinner line completely
+	printf "\r${CLEAR_LINE}"
+	
+	# Restore cursor and job control
+	tput cnorm 2>/dev/null || true
+	# Only re-enable job control in interactive shells
+	[[ $- == *i* ]] && set -m 2>/dev/null || true
+	
+	# Show final result on a clean line
 	if [[ $exit_code -eq 0 ]]; then
-		printf "\r${COLOR_BOLD_GREEN}✔${NC}  ${task_name}${CLEAR_LINE}\n"
+		printf "${COLOR_BOLD_GREEN}✔${NC}  ${task_name}\n"
 		((SPINNER_TASK_SUCCESS++))
 	else
-		printf "\r${COLOR_BOLD_RED}✗${NC}  ${task_name}${CLEAR_LINE}\n"
+		printf "${COLOR_BOLD_RED}✗${NC}  ${task_name}\n"
 		((SPINNER_TASK_FAILED++))
 	fi
 	
@@ -243,6 +257,8 @@ spinner_cleanup() {
 		unset SPINNER_PID_FILE
 	fi
 	tput cnorm 2>/dev/null || true
+	# Only re-enable job control in interactive shells
+	[[ $- == *i* ]] && set -m 2>/dev/null || true
 }
 
 # Set up cleanup trap

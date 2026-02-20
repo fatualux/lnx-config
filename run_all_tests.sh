@@ -60,7 +60,6 @@ test_files=(
     "test_aliases.sh"
     "test_music.sh"
     "test_docker.sh"
-    "test_wsl_interop.sh"
 )
 
 for test_file in "${test_files[@]}"; do

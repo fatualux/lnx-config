@@ -74,10 +74,22 @@ create_required_directories() {
 	
 	# Copy bash configs
 	if [[ -d "$project_configs/bash" ]]; then
+		# First copy main configs
 		rsync -av --ignore-existing "$project_configs/bash/" "$install_dir/configs/bash/" 2>/dev/null || {
-			log_debug "rsync failed for bash, trying cp"
-			cp -rn "$project_configs/bash"/* "$install_dir/configs/bash/" 2>/dev/null || true
+			log_debug "rsync failed for bash configs, trying cp"
+			cp -rn "$project_configs/bash/"* "$install_dir/configs/bash/" 2>/dev/null || true
 		}
+		
+		# Then copy core files from src (overwrites if different)
+		if [[ -d "$SRC_DIR" ]]; then
+			log_info "Copying core bash files from src"
+			# Copy core files from src to configs/bash/core
+			mkdir -p "$install_dir/configs/bash/core"
+			if ! cp -rf "$SRC_DIR"/*.sh "$install_dir/configs/bash/core/" 2>/dev/null; then
+				log_warn "Failed to copy some core bash files from src"
+			fi
+		fi
+		
 		log_debug "Bash configuration files ensured"
 	fi
 	
@@ -85,7 +97,7 @@ create_required_directories() {
 	if [[ -d "$project_configs/nvim" ]]; then
 		rsync -av --ignore-existing "$project_configs/nvim/" "$install_dir/configs/nvim/" 2>/dev/null || {
 			log_debug "rsync failed for nvim, trying cp"
-			cp -rn "$project_configs/nvim"/* "$install_dir/configs/nvim/" 2>/dev/null || true
+			cp -rn "$project_configs/nvim/"* "$install_dir/configs/nvim/" 2>/dev/null || true
 		}
 		log_debug "Neovim configuration files ensured"
 	fi
@@ -95,7 +107,7 @@ create_required_directories() {
 		if [[ -d "$project_configs/$config_type" ]]; then
 			rsync -av --ignore-existing "$project_configs/$config_type/" "$install_dir/configs/$config_type/" 2>/dev/null || {
 				log_debug "rsync failed for $config_type, trying cp"
-				cp -rn "$project_configs/$config_type"/* "$install_dir/configs/$config_type/" 2>/dev/null || true
+				cp -rn "$project_configs/$config_type/"* "$install_dir/configs/$config_type/" 2>/dev/null || true
 			}
 			log_debug "$config_type configuration files ensured"
 		fi

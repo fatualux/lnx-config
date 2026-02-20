@@ -7,6 +7,7 @@ alias cdd="code ."
 alias dkl="docker logs -f"
 alias ds="docker system info"
 alias c="clear"
+alias co="checkout"
 
 # Custom Function Aliases
 alias lma="list_my_aliases"

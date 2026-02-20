@@ -66,6 +66,20 @@ readonly LOG_LEVEL_CRITICAL=5
 # Default log level (INFO)
 : "${LOG_LEVEL:=1}"
 
+# Normalize LOG_LEVEL if it's not a number (e.g., from .env files)
+if ! [[ "$LOG_LEVEL" =~ ^[0-9]+$ ]]; then
+    # Try to convert string level names to numbers
+    case "${LOG_LEVEL^^}" in
+        DEBUG) LOG_LEVEL=0 ;;
+        INFO) LOG_LEVEL=1 ;;
+        SUCCESS) LOG_LEVEL=2 ;;
+        WARNING|WARN) LOG_LEVEL=3 ;;
+        ERROR) LOG_LEVEL=4 ;;
+        CRITICAL|CRIT) LOG_LEVEL=5 ;;
+        *) LOG_LEVEL=1 ;;  # Default to INFO for unknown values
+    esac
+fi
+
 # Enable/disable logging to file
 : "${LOG_TO_FILE:=false}"
 : "${LOG_FILE:=$HOME/.bash_config.log}"
@@ -277,7 +291,7 @@ log_prompt() {
 
 # Print a separator line
 log_separator() {
-    printf "${COLOR_DIM}%80s${NC}\n" | tr ' ' '-'
+    echo -e "${COLOR_DIM}$(printf '%0.s-' {1..80})${NC}"
 }
 
 # Print current log level

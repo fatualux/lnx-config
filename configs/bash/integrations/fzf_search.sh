@@ -5,23 +5,7 @@ if [[ -z "$__LOGGER_SOURCED" ]] && [[ -f "$BASH_CONFIG_DIR/core/logger.sh" ]]; t
     source "$BASH_CONFIG_DIR/core/logger.sh"
 fi
 
-# --- Clean & Deduplicate on Exit ---
-__bash_history_cleanup() {
-    log_debug "Cleaning up bash history on exit"
-    history -a
-    awk '!seen[$0]++' "$HISTFILE" | tail -n "$HISTFILESIZE" > "${HISTFILE}.tmp" && mv "${HISTFILE}.tmp" "$HISTFILE"
-    log_debug "History cleanup complete"
-}
-
-# Safely integrate with PROMPT_COMMAND
-if [[ -n "$PROMPT_COMMAND" ]]; then
-    PROMPT_COMMAND="__bash_history_sync; $PROMPT_COMMAND"
-else
-    PROMPT_COMMAND="__bash_history_sync"
-fi
-trap '__bash_history_cleanup' EXIT
-
-# --- fzf Fuzzy History Search (Ctrl-R) ---
+# --- fzf Fuzzy History Search ---
 fzf_history_search() {
   log_func_start "fzf_history_search"
   if ! command -v fzf >/dev/null 2>&1; then
@@ -56,13 +40,4 @@ fzf_history_search() {
   log_func_end "fzf_history_search"
 }
 
-# Only bind fzf history search for interactive shells if fzf is available
-if [[ $- == *i* ]] && command -v fzf >/dev/null 2>&1 && [[ -z "$FZF_HISTORY_BOUND" ]]; then
-    log_debug "Configuring fzf history search for interactive shell"
-    # Unbind any previous Ctrl-R
-    bind -r "\C-r" 2>/dev/null
-    # Bind our custom widget
-    bind -x '"\C-r": fzf_history_search'
-    log_info "fzf history search enabled (Ctrl-R)"
-    export FZF_HISTORY_BOUND=1
-fi
+alias f='fzf_history_search'

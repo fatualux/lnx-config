@@ -1,197 +1,225 @@
 #!/bin/bash
 # ============================================================================
-# Smart Bash Completion - Options & Commands for Any Command
+# Optimized Bash Completion System
 # ============================================================================
 # Features:
-#   - Automatic option extraction from --help / -h / man pages
-#   - Smart caching with 24-hour TTL for performance
-#   - Git subcommands and global options
-#   - Fallback to file/directory completion
-#   - No external dependencies beyond grep/man
-#
-# Cache Location: $HOME/.cache/bash-smart-complete/
+#   - Lazy loading of completion modules
+#   - Unified caching and performance tracking
+#   - Modular architecture
+#   - Smart resource management
 
-# Optimize loading - only set up if not already loaded
-if [[ -z "$_BASH_SMART_COMPLETE_LOADED" ]]; then
-    _BASH_SMART_COMPLETE_LOADED=1
+# Prevent multiple loading
+if [[ -n "$_BASH_COMPLETION_SYSTEM_LOADED" ]]; then
+    return 0
+fi
+_BASH_COMPLETION_SYSTEM_LOADED=1
 
-    # Only initialize cache directory if needed
-    _smart_cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/bash-smart-complete"
-    _smart_cache_ttl=86400  # 24 hours
+# Load configuration first
+if [[ -f "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/config.sh" ]]; then
+    source "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/config.sh"
+fi
 
-    # ========================================================================
-    # Option Extraction with Caching
-    # ========================================================================
-    _smart_extract_opts() {
-        local cmd="$1"
-        local cache="${_smart_cache_dir}/${cmd}.opts"
+# Source core utilities
+if [[ -f "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/core/completion_utils.sh" ]]; then
+    source "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/core/completion_utils.sh"
+else
+    # Fallback minimal implementation
+    return 0
+fi
 
-        # Return cached options if valid
-        if [[ -f "$cache" ]]; then
-            local cache_age=$(($(date +%s) - $(stat -c %Y "$cache" 2>/dev/null || echo 0)))
-            if (( cache_age < _smart_cache_ttl )); then
-                cat "$cache"
-                return 0
+# ============================================================================
+# Completion Module Registry
+# ============================================================================
+
+declare -A _COMPLETION_MODULES=(
+    ["git"]="completions/git.sh"
+    ["docker"]="completions/docker.sh"
+    ["npm"]="completions/npm.sh"
+    ["ssh"]="completions/ssh.sh"
+    ["systemd"]="completions/systemd.sh"
+)
+
+declare -A _COMPLETION_PATTERNS=(
+    ["git"]="git.*"
+    ["docker"]="docker|docker-compose"
+    ["npm"]="npm|yarn|pnpm"
+    ["ssh"]="ssh|scp|sftp"
+    ["systemd"]="systemctl|journalctl|systemd-*"
+)
+
+# ============================================================================
+# Smart Universal Completion
+# ============================================================================
+
+_smart_universal_complete() {
+    local cur prev cmd
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    cmd="${COMP_WORDS[0]}"
+    
+    _completion_track_start
+    
+    # Try to load appropriate completion module
+    local module_loaded=0
+    for module_name in "${!_COMPLETION_MODULES[@]}"; do
+        local pattern="${_COMPLETION_PATTERNS[$module_name]}"
+        if [[ "$cmd" =~ $pattern ]]; then
+            local module_file="${_COMPLETION_MODULES[$module_name]}"
+            local full_path="${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/$module_file"
+            
+            if _completion_lazy_load "$module_name" "$full_path"; then
+                # Call the module's completion function if it exists
+                local completion_func="_${module_name}_complete"
+                if declare -F "$completion_func" >/dev/null; then
+                    "$completion_func"
+                    module_loaded=1
+                    break
+                fi
             fi
         fi
+    done
+    
+    # Fallback to basic completion if no module loaded
+    if (( module_loaded == 0 )); then
+        _smart_basic_complete
+    fi
+    
+    _completion_track_end
+}
 
-        # Create cache dir if needed
-        mkdir -p "$_smart_cache_dir" 2>/dev/null
+_smart_basic_complete() {
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local prev="${COMP_WORDS[COMP_CWORD-1]}"
+    local cmd="${COMP_WORDS[0]}"
+    
+    # Option completion for commands starting with -
+    if [[ "$cur" == -* ]]; then
+        _completion_complete_with_cache "$cmd" "${cmd}_opts" "_extract_command_options" "$cur"
+        return
+    fi
+    
+    # File/directory completion
+    _completion_complete_files "$cur"
+}
 
-        # Extract options from multiple sources
-        local opts
-        opts=$(
+_extract_command_options() {
+    local cmd="$1"
+    local cache_key="${cmd}_help"
+    
+    if ! _completion_cache_get "$cache_key"; then
+        local help_output
+        help_output=$(
             {
                 "$cmd" --help 2>/dev/null
                 "$cmd" -h 2>/dev/null
                 "$cmd" -? 2>/dev/null
                 man "$cmd" 2>/dev/null || true
-            } | grep -oE '(^|[[:space:]])--?[a-zA-Z0-9][a-zA-Z0-9_-]*' |
-            sed 's/^[[:space:]]*//; s/[[:space:]]*$//' |
-            sort -u
+            } 2>/dev/null
         )
-
-        # Cache and return
-        echo "$opts" > "$cache" 2>/dev/null
-        echo "$opts"
-    }
-
-    # ========================================================================
-    # Git Smart Completion
-    # ========================================================================
-    _smart_git_complete() {
-        if [[ -z "${COMP_CWORD+x}" || ${COMP_CWORD:-0} -lt 0 || ${#COMP_WORDS[@]} -eq 0 || ${COMP_CWORD:-0} -ge ${#COMP_WORDS[@]} ]]; then
-            COMPREPLY=()
-            return 0
-        fi
-        local cur="${COMP_WORDS[COMP_CWORD]}"
-        local prev="${COMP_WORDS[COMP_CWORD-1]}"
-        local -i cword_count=$COMP_CWORD
-
-        # Git subcommands at position 1
-        if (( cword_count == 1 )); then
-            local subcmds
-            subcmds=$(git help -a 2>/dev/null | awk '{print $1}' | grep -v '^$')
-            COMPREPLY=( $(compgen -W "$subcmds" -- "$cur") )
-            return
-        fi
-
-        # Option completion when starts with -
-        if [[ "$cur" == -* ]]; then
-            local git_opts
-            git_opts=$(_smart_extract_opts git)
-            COMPREPLY=( $(compgen -W "$git_opts" -- "$cur") )
-            return
-        fi
-
-        # Branch/ref completion for checkout, merge, rebase, etc.
-        if [[ "${COMP_WORDS[1]}" =~ ^(checkout|merge|rebase|diff|log|reset)$ ]]; then
-            local branches
-            branches=$(git branch -a 2>/dev/null | sed 's/^[[:space:]]*[*]?[[:space:]]*//; s%remotes/%%')
-            COMPREPLY=( $(compgen -W "$branches" -- "$cur") )
-            return
-        fi
-
-        # Default to file completion
-        _smart_file_complete "$cur"
-    }
-
-    # ========================================================================
-    # File/Directory Completion Helpers
-    # ========================================================================
-    _smart_file_complete() {
-        local cur="$1"
-        local -a dirs files replies
-        local IFS=$'\n'
-
-        dirs=( $(compgen -A directory -- "$cur") )
-        files=( $(compgen -A file -- "$cur") )
-        replies=( "${dirs[@]}" "${files[@]}" )
-
-        if (( ${#replies[@]} == 0 )); then
-            COMPREPLY=()
-            return
-        fi
-
-        if (( ${#dirs[@]} > 0 )); then
-            compopt -o nospace 2>/dev/null
-            for i in "${!replies[@]}"; do
-                if [[ -d "${replies[i]}" && "${replies[i]}" != */ ]]; then
-                    replies[i]="${replies[i]}/"
-                fi
-            done
-        fi
-
-        COMPREPLY=( "${replies[@]}" )
-    }
-
-    # ========================================================================
-    # Universal Completion Function
-    # ========================================================================
-    _smart_complete() {
-        if [[ -z "${COMP_CWORD+x}" || ${COMP_CWORD:-0} -lt 0 || ${#COMP_WORDS[@]} -eq 0 || ${COMP_CWORD:-0} -ge ${#COMP_WORDS[@]} ]]; then
-            COMPREPLY=()
-            return 0
-        fi
-        local cur prev cmd
-        cur="${COMP_WORDS[COMP_CWORD]}"
-        prev="${COMP_WORDS[COMP_CWORD-1]}"
-        cmd="${COMP_WORDS[0]}"
-
-        # Special handling for git
-        if [[ "$cmd" == git ]]; then
-            _smart_git_complete
-            return
-        fi
-
-        # Option completion for any starting with -
-        if [[ "$cur" == -* ]]; then
-            local opts
-            opts=$(_smart_extract_opts "$cmd")
-            COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
-            return
-        fi
-
-        # Default: file completion
-        _smart_file_complete "$cur"
-    }
-
-    # ========================================================================
-    # Register Completions (optimized)
-    # ========================================================================
-    # Only apply universal completion if not already set
-    if [[ -z "$_BASH_SMART_COMPLETE_REGISTERED" ]]; then
-        # Apply universal completion to all commands via -D flag
-        complete -o default -o bashdefault -F _smart_complete -D
-        export _BASH_SMART_COMPLETE_REGISTERED=1
+        
+        local opts
+        opts=$(_completion_filter_options "$help_output" "--?")
+        echo "$opts" | _completion_cache_set "$cache_key"
     fi
+}
 
-    # Load enhanced Git completion if available (overrides -D default)
-    # Only load once to avoid redundant sourcing
+# ============================================================================
+# Completion Registration
+# ============================================================================
+
+_register_completions() {
+    # Register universal completion for all commands
+    complete -o default -o bashdefault -F _smart_universal_complete -D
+    
+    # Register specific completions for common commands
+    local common_commands=(
+        "git" "docker" "docker-compose" "npm" "yarn" "pnpm"
+        "ssh" "scp" "sftp" "systemctl" "journalctl"
+    )
+    
+    for cmd in "${common_commands[@]}"; do
+        if command -v "$cmd" >/dev/null 2>&1; then
+            complete -o default -o bashdefault -F _smart_universal_complete "$cmd"
+        fi
+    done
+}
+
+# ============================================================================
+# Performance and Debug Commands
+# ============================================================================
+
+_completion_stats() {
+    echo "=== Bash Completion Statistics ==="
+    _completion_get_metrics
+    echo "Cache Directory: ${_COMPLETION_CONFIG[cache_dir]}"
+    echo "Cache TTL: ${_COMPLETION_CONFIG[cache_ttl]} seconds"
+    echo "Lazy Loading: ${_COMPLETION_CONFIG[lazy_load]}"
+}
+
+_completion_debug() {
+    local mode="${1:-toggle}"
+    case "$mode" in
+        "on"|"1")
+            _COMPLETION_CONFIG[debug_mode]=1
+            echo "Completion debug mode enabled"
+            ;;
+        "off"|"0")
+            _COMPLETION_CONFIG[debug_mode]=0
+            echo "Completion debug mode disabled"
+            ;;
+        "toggle")
+            if (( _COMPLETION_CONFIG[debug_mode] == 1 )); then
+                _completion_debug off
+            else
+                _completion_debug on
+            fi
+            ;;
+        *)
+            echo "Usage: completion-debug [on|off|toggle]"
+            ;;
+    esac
+}
+
+_completion_clear_cache() {
+    local cache_dir="${_COMPLETION_CONFIG[cache_dir]}"
+    if [[ -d "$cache_dir" ]]; then
+        rm -rf "$cache_dir"/*.cache 2>/dev/null
+        echo "Completion cache cleared"
+    fi
+    _completion_init  # Reinitialize
+}
+
+# Register convenience commands
+alias completion-stats='_completion_stats'
+alias completion-debug='_completion_debug'
+alias completion-clear='_completion_clear_cache'
+
+# ============================================================================
+# Initialize System
+# ============================================================================
+
+# Only register completions in interactive mode
+if [[ $- == *i* ]]; then
+    _register_completions
+    
+    # Load Git completion if available
     if [[ -z "$_GIT_COMPLETION_LOADED" ]]; then
-        if [[ -f "$BASH_CONFIG_DIR/completion/completions/git.sh" ]]; then
-            source "$BASH_CONFIG_DIR/completion/completions/git.sh"
+        if [[ -f "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/completions/git.sh" ]]; then
+            source "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/completions/git.sh"
             export _GIT_COMPLETION_LOADED=1
-        elif [[ -f "$BASH_CONFIG_DIR/completion/git-completion/main.sh" ]]; then
-            source "$BASH_CONFIG_DIR/completion/git-completion/main.sh"
-            export _GIT_COMPLETION_LOADED=1
-        else
-            complete -o bashdefault -F _smart_git_complete git
         fi
     fi
 
-    # Load Docker completion if available (only load once)
+    # Load Docker completion if available
     if [[ -z "$_DOCKER_COMPLETION_LOADED" ]]; then
-        if [[ -f "$BASH_CONFIG_DIR/completion/completions/docker.sh" ]]; then
-            source "$BASH_CONFIG_DIR/completion/completions/docker.sh"
-            export _DOCKER_COMPLETION_LOADED=1
-        elif [[ -f "$BASH_CONFIG_DIR/completion/docker-completion/main.sh" ]]; then
-            source "$BASH_CONFIG_DIR/completion/docker-completion/main.sh"
-            export _DOCKER_COMPLETION_LOADED=1
-        elif [[ -f "$BASH_CONFIG_DIR/completion/docker-completion.sh" ]]; then
-            source "$BASH_CONFIG_DIR/completion/docker-completion.sh"
+        if [[ -f "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/completions/docker.sh" ]]; then
+            source "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/completions/docker.sh"
             export _DOCKER_COMPLETION_LOADED=1
         fi
     fi
-
-fi  # End of _BASH_SMART_COMPLETE_LOADED check
+    
+    # Show performance summary if debug mode is enabled
+    if (( _COMPLETION_CONFIG[debug_mode] == 1 )); then
+        echo "Bash completion system loaded (debug mode)"
+    fi
+fi

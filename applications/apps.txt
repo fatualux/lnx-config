@@ -39,6 +39,7 @@ python3.11
 python3.11-venv
 ranger
 rustc
+shellcheck
 ssh
 tmux
 tree
