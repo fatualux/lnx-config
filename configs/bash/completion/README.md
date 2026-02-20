@@ -4,6 +4,8 @@
 
 This is a high-performance, modular bash completion system that provides intelligent command completion with smart caching, lazy loading, and comprehensive resource management.
 
+**Note**: This system replaces the previous dual-version approach. Old completion files have been replaced with optimized versions directly.
+
 ## Features
 
 ### Performance Optimizations
@@ -16,7 +18,7 @@ This is a high-performance, modular bash completion system that provides intelli
 - **Core Utilities**: Shared caching and performance functions
 - **Modular Completions**: Separate modules for Git, Docker, etc.
 - **Configuration Management**: Centralized configuration system
-- **Backward Compatibility**: Seamless migration from existing setup
+- **Clean Implementation**: No version duplication, single optimized system
 
 ### Supported Commands
 - **Git**: Comprehensive subcommand and option completion
@@ -29,15 +31,12 @@ This is a high-performance, modular bash completion system that provides intelli
 ```
 completion/
 ├── config.sh                    # Configuration settings
-├── autocomplete.sh              # Legacy compatibility wrapper
-├── autocomplete_optimized.sh    # Main optimized system
+├── autocomplete.sh              # Main optimized system
 ├── core/
 │   └── completion_utils.sh      # Core utilities and caching
 ├── completions/
-│   ├── git_optimized.sh         # Optimized Git completion
-│   ├── docker_optimized.sh      # Optimized Docker completion
-│   ├── git.sh                   # Legacy Git completion
-│   └── docker.sh                # Legacy Docker completion
+│   ├── git.sh                   # Optimized Git completion
+│   └── docker.sh                # Optimized Docker completion
 └── bash-autopairs/
     ├── main.sh                  # Auto-pairs loader
     └── autopairs.sh             # Auto-pairs implementation
@@ -118,15 +117,14 @@ completion-clear
 
 ### From Legacy System
 
-The optimized system provides backward compatibility. Simply update your bash configuration to use the new system:
+The optimized system has replaced the old completion files directly. Simply update your bash configuration:
 
 ```bash
-# Old way (still works)
+# Load the optimized completion system
 source ~/.config/bash/completion/autocomplete.sh
-
-# New way (recommended)
-source ~/.config/bash/completion/autocomplete_optimized.sh
 ```
+
+The old files have been backed up and replaced with optimized versions.
 
 ### Custom Completions
 
