@@ -137,41 +137,30 @@
 │   ├── nvim-structure.md
 │   ├── STRUCTURE.md
 │   └── tests.md
-├── LICENSE
-├── main.sh
-├── quick-reference.sh
+├── installer.sh
 ├── run_all_tests.sh
-├── scripts/
-│   └── make-dir-tree.sh
 ├── src/
+│   ├── applications.sh
+│   ├── backup.sh
 │   ├── colors.sh
+│   ├── git.sh
+│   ├── install.sh
 │   ├── logger.sh
-│   └── spinner.sh
+│   ├── main.sh
+│   ├── nixos.sh
+│   ├── permissions.sh
+│   ├── prompts.sh
+│   ├── spinner.sh
+│   ├── symlinks.sh
+│   └── ui.sh
 └── tests/
     ├── logs/
-    │   ├── test_modules_20260130_182527.log
-    │   ├── test_modules_20260130_182636.log
-    │   ├── test_modules_20260130_184145.log
-    │   ├── test_modules_20260130_185209.log
-    │   ├── test_modules_20260130_185523.log
-    │   ├── test_modules_20260130_185609.log
-    │   ├── test_modules_20260130_214723.log
-    │   ├── test_modules_20260130_214953.log
-    │   ├── test_modules_20260130_230037.log
-    │   ├── test_modules_20260131_082320.log
-    │   ├── test_modules_20260131_082336.log
-    │   ├── test_modules_20260131_082356.log
-    │   └── test_modules_20260131_082400.log
     ├── run_tests_with_spinners.sh
     ├── test_aliases.sh
     ├── test_autocomplete.sh
     ├── test_docker.sh
     ├── test_filesystem.sh
-    ├── test_integration.sh
-    ├── test_make_dir_tree.sh
     ├── test_modules.sh
     ├── test_music.sh
     ├── test_readline.sh
-    ├── test_themes.sh
     └── test_utils.sh
-```

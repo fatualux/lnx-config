@@ -25,7 +25,7 @@ for module in colors.sh logger.sh spinner.sh; do
 done
 
 # Source functional modules with error checking
-for module in ui.sh prompts.sh backup.sh install.sh symlinks.sh permissions.sh git.sh applications.sh wsl.sh nixos.sh main.sh; do
+for module in ui.sh prompts.sh backup.sh install.sh symlinks.sh permissions.sh git.sh applications.sh nixos.sh main.sh; do
 	if [[ -f "$SRC_DIR/$module" ]]; then
 		source "$SRC_DIR/$module"
 	else

@@ -10,11 +10,8 @@ Project-wide test suite for validating bash configuration, functions, integratio
 - test_readline.sh: Tests readline completion settings.
 - test_docker.sh: Tests docker helpers.
 - test_filesystem.sh: Tests filesystem helpers.
-- test_integration.sh: Integration tests across modules.
-- test_make_dir_tree.sh: Tests the directory tree generator.
 - test_modules.sh: Tests module loading and sourcing.
 - test_music.sh: Tests music helpers.
-- test_themes.sh: Tests theme logic.
 - test_utils.sh: Test utilities and assertions.
 - logs/: Test output logs.
 
