@@ -1,23 +1,33 @@
 #!/bin/bash
 # ============================================================================
-# Smart Bash Completion - Options & Commands for Any Command
+# Optimized Bash Completion System - Legacy Compatibility Wrapper
 # ============================================================================
+# This file provides backward compatibility while loading the optimized system
+# 
 # Features:
-#   - Automatic option extraction from --help / -h / man pages
-#   - Smart caching with 24-hour TTL for performance
-#   - Git subcommands and global options
-#   - Fallback to file/directory completion
-#   - No external dependencies beyond grep/man
-#
-# Cache Location: $HOME/.cache/bash-smart-complete/
+#   - Backward compatibility with existing setup
+#   - Automatic migration to optimized system
+#   - Performance monitoring and metrics
+#   - Graceful fallback if optimized system unavailable
 
-# Optimize loading - only set up if not already loaded
+# Load configuration first
+if [[ -f "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/config.sh" ]]; then
+    source "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/config.sh"
+fi
+
+# Try to load optimized system
+if [[ -f "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/autocomplete_optimized.sh" ]]; then
+    source "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/autocomplete_optimized.sh"
+    return 0
+fi
+
+# Fallback to original implementation if optimized system not available
 if [[ -z "$_BASH_SMART_COMPLETE_LOADED" ]]; then
     _BASH_SMART_COMPLETE_LOADED=1
 
     # Only initialize cache directory if needed
-    _smart_cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/bash-smart-complete"
-    _smart_cache_ttl=86400  # 24 hours
+    _smart_cache_dir="${COMPLETION_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/bash-smart-complete}"
+    _smart_cache_ttl="${COMPLETION_CACHE_TTL:-86400}"
 
     # ========================================================================
     # Option Extraction with Caching
@@ -169,11 +179,11 @@ if [[ -z "$_BASH_SMART_COMPLETE_LOADED" ]]; then
     # Load enhanced Git completion if available (overrides -D default)
     # Only load once to avoid redundant sourcing
     if [[ -z "$_GIT_COMPLETION_LOADED" ]]; then
-        if [[ -f "$BASH_CONFIG_DIR/completion/completions/git.sh" ]]; then
-            source "$BASH_CONFIG_DIR/completion/completions/git.sh"
+        if [[ -f "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/completions/git.sh" ]]; then
+            source "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/completions/git.sh"
             export _GIT_COMPLETION_LOADED=1
-        elif [[ -f "$BASH_CONFIG_DIR/completion/git-completion/main.sh" ]]; then
-            source "$BASH_CONFIG_DIR/completion/git-completion/main.sh"
+        elif [[ -f "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/completions/git_optimized.sh" ]]; then
+            source "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/completions/git_optimized.sh"
             export _GIT_COMPLETION_LOADED=1
         else
             complete -o bashdefault -F _smart_git_complete git
@@ -182,14 +192,11 @@ if [[ -z "$_BASH_SMART_COMPLETE_LOADED" ]]; then
 
     # Load Docker completion if available (only load once)
     if [[ -z "$_DOCKER_COMPLETION_LOADED" ]]; then
-        if [[ -f "$BASH_CONFIG_DIR/completion/completions/docker.sh" ]]; then
-            source "$BASH_CONFIG_DIR/completion/completions/docker.sh"
+        if [[ -f "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/completions/docker.sh" ]]; then
+            source "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/completions/docker.sh"
             export _DOCKER_COMPLETION_LOADED=1
-        elif [[ -f "$BASH_CONFIG_DIR/completion/docker-completion/main.sh" ]]; then
-            source "$BASH_CONFIG_DIR/completion/docker-completion/main.sh"
-            export _DOCKER_COMPLETION_LOADED=1
-        elif [[ -f "$BASH_CONFIG_DIR/completion/docker-completion.sh" ]]; then
-            source "$BASH_CONFIG_DIR/completion/docker-completion.sh"
+        elif [[ -f "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/completions/docker_optimized.sh" ]]; then
+            source "${BASH_CONFIG_DIR:-$HOME/.config/bash}/completion/completions/docker_optimized.sh"
             export _DOCKER_COMPLETION_LOADED=1
         fi
     fi
