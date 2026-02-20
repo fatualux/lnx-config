@@ -25,6 +25,66 @@ resolve_package_name() {
                     ;;
             esac
             ;;
+        arch|manjaro)
+            case "$package" in
+                python)
+                    echo "python"
+                    return 0
+                    ;;
+                openssh)
+                    echo "openssh"
+                    return 0
+                    ;;
+            esac
+            ;;
+        fedora|rhel|centos)
+            case "$package" in
+                python)
+                    echo "python3"
+                    return 0
+                    ;;
+                openssh)
+                    echo "openssh-clients"
+                    return 0
+                    ;;
+            esac
+            ;;
+        freebsd)
+            case "$package" in
+                python)
+                    echo "python3"
+                    return 0
+                    ;;
+                openssh)
+                    echo "openssh-portable"
+                    return 0
+                    ;;
+            esac
+            ;;
+        alpine)
+            case "$package" in
+                python)
+                    echo "python3"
+                    return 0
+                    ;;
+                openssh)
+                    echo "openssh"
+                    return 0
+                    ;;
+            esac
+            ;;
+        opensuse)
+            case "$package" in
+                python)
+                    echo "python3"
+                    return 0
+                    ;;
+                openssh)
+                    echo "openssh"
+                    return 0
+                    ;;
+            esac
+            ;;
     esac
 
     echo "$package"
@@ -58,6 +118,30 @@ update_package_cache() {
         fedora|rhel|centos)
             output=$(sudo dnf check-update 2>&1 || true)
             log_debug "dnf check-update completed"
+            ;;
+        freebsd)
+            if output=$(sudo pkg update 2>&1); then
+                log_debug "pkg update completed successfully"
+            else
+                log_warning "pkg update had some warnings"
+                echo "$output" >> "$LOG_FILE"
+            fi
+            ;;
+        alpine)
+            if output=$(sudo apk update 2>&1); then
+                log_debug "apk update completed successfully"
+            else
+                log_warning "apk update had some warnings"
+                echo "$output" >> "$LOG_FILE"
+            fi
+            ;;
+        opensuse)
+            if output=$(sudo zypper refresh 2>&1); then
+                log_debug "zypper refresh completed successfully"
+            else
+                log_warning "zypper refresh had some warnings"
+                echo "$output" >> "$LOG_FILE"
+            fi
             ;;
     esac
 
@@ -97,6 +181,15 @@ install_package() {
         fedora|rhel|centos)
             install_cmd="dnf install -y $resolved_package"
             ;;
+        freebsd)
+            install_cmd="pkg install -y $resolved_package"
+            ;;
+        alpine)
+            install_cmd="apk add $resolved_package"
+            ;;
+        opensuse)
+            install_cmd="zypper install -y $resolved_package"
+            ;;
         *)
             log_error "Unsupported OS: $os"
             return 1
@@ -132,4 +225,38 @@ install_package() {
     fi
 
     return $exit_code
+}
+
+# Try installing package with multiple package managers gracefully
+try_install_with_fallback() {
+    local package="$1"
+    local managers=($(detect_package_managers))
+    local last_error=""
+    local success=false
+    
+    log_info "Attempting to install $package with available package managers..."
+    
+    for manager in "${managers[@]}"; do
+        local os=$(map_pm_to_os "$manager")
+        log_info "Trying $manager (OS: $os)..."
+        
+        if install_package "$package" "$os"; then
+            log_success "Successfully installed $package using $manager"
+            success=true
+            break
+        else
+            last_error="Failed with $manager"
+            log_warning "$last_error"
+        fi
+    done
+    
+    if ! $success; then
+        log_error "Failed to install $package with all available package managers"
+        log_error "Available managers: ${managers[*]}"
+        log_error "Last error: $last_error"
+        FAILED_PACKAGES+=("$package")
+        return 1
+    fi
+    
+    return 0
 }
