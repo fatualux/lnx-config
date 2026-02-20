@@ -21,3 +21,5 @@ bundle
 .vscode
 lazy-lock.json
 .windsurfrules
+.windsurf/
+.rules.md
