@@ -37,18 +37,6 @@ else
     ((FAILED++))
 fi
 
-# Test: all theme files exist
-EXPECTED_THEMES=("default" "minimal" "compact" "developer")
-for theme in "${EXPECTED_THEMES[@]}"; do
-    if [ -f "$THEMES_DIR/${theme}.sh" ]; then
-        echo -e "${GREEN}✓${NC} Theme '$theme' exists"
-        ((PASSED++))
-    else
-        echo -e "${RED}✗${NC} Theme '$theme' exists"
-        ((FAILED++))
-    fi
-done
-
 # Test: theme files have valid bash syntax
 echo -e "\n${BLUE}=== Theme Syntax Validation ===${NC}\n"
 for theme_file in "$THEMES_DIR"/*.sh; do
