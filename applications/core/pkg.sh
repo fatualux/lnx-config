@@ -49,18 +49,6 @@ resolve_package_name() {
                     ;;
             esac
             ;;
-        freebsd)
-            case "$package" in
-                python)
-                    echo "python3"
-                    return 0
-                    ;;
-                openssh)
-                    echo "openssh-portable"
-                    return 0
-                    ;;
-            esac
-            ;;
         alpine)
             case "$package" in
                 python)
@@ -119,14 +107,6 @@ update_package_cache() {
             output=$(sudo dnf check-update 2>&1 || true)
             log_debug "dnf check-update completed"
             ;;
-        freebsd)
-            if output=$(sudo pkg update 2>&1); then
-                log_debug "pkg update completed successfully"
-            else
-                log_warning "pkg update had some warnings"
-                echo "$output" >> "$LOG_FILE"
-            fi
-            ;;
         alpine)
             if output=$(sudo apk update 2>&1); then
                 log_debug "apk update completed successfully"
@@ -180,9 +160,6 @@ install_package() {
             ;;
         fedora|rhel|centos)
             install_cmd="dnf install -y $resolved_package"
-            ;;
-        freebsd)
-            install_cmd="pkg install -y $resolved_package"
             ;;
         alpine)
             install_cmd="apk add $resolved_package"

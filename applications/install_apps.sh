@@ -42,7 +42,7 @@ main() {
         log_warning "Unable to detect OS. Will try available package managers..."
         local managers=($(detect_package_managers))
         if [[ ${#managers[@]} -eq 0 ]]; then
-            log_error "No supported package managers found. Please install one of: apt, dnf, yum, pacman, pkg, apk, zypper"
+            log_error "No supported package managers found. Please install one of: apt, dnf, yum, pacman, apk, zypper"
             exit 1
         fi
         log_info "Found package managers: ${managers[*]}"

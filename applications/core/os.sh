@@ -36,9 +36,6 @@ detect_package_managers() {
     if command -v pacman >/dev/null 2>&1; then
         managers+=("pacman")
     fi
-    if command -v pkg >/dev/null 2>&1; then
-        managers+=("pkg")
-    fi
     if command -v apk >/dev/null 2>&1; then
         managers+=("apk")
     fi
@@ -61,9 +58,6 @@ map_pm_to_os() {
             ;;
         pacman)
             echo "arch"
-            ;;
-        pkg)
-            echo "freebsd"
             ;;
         apk)
             echo "alpine"
