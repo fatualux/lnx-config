@@ -19,9 +19,20 @@ else
 # Batch source core utilities to reduce file system calls
 _source_core_files() {
     local core_dir="$BASH_CONFIG_DIR/core"
-    [[ -f "$core_dir/logger.sh" ]] && source "$core_dir/logger.sh"
-    [[ -f "$core_dir/spinner.sh" ]] && source "$core_dir/spinner.sh"
-    [[ -f "$core_dir/colors.sh" ]] && source "$core_dir/colors.sh"
+    # Only attempt to source if core directory exists
+    if [[ -d "$core_dir" ]]; then
+        [[ -f "$core_dir/logger.sh" ]] && source "$core_dir/logger.sh"
+        [[ -f "$core_dir/spinner.sh" ]] && source "$core_dir/spinner.sh"
+        [[ -f "$core_dir/colors.sh" ]] && source "$core_dir/colors.sh"
+    else
+        # Fallback: try to source from the main lnx-config src directory
+        local lnx_src_dir="$HOME/.lnx-config/src"
+        if [[ -d "$lnx_src_dir" ]]; then
+            [[ -f "$lnx_src_dir/logger.sh" ]] && source "$lnx_src_dir/logger.sh"
+            [[ -f "$lnx_src_dir/spinner.sh" ]] && source "$lnx_src_dir/spinner.sh"
+            [[ -f "$lnx_src_dir/colors.sh" ]] && source "$lnx_src_dir/colors.sh"
+        fi
+    fi
 }
 _source_core_files
 

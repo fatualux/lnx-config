@@ -14,23 +14,24 @@ user_email=""
 export LOG_LEVEL=0
 export LOG_TIMESTAMP=true
 
-# Source core modules
-source "$SRC_DIR/colors.sh"
-source "$SRC_DIR/logger.sh"
-source "$SRC_DIR/spinner.sh"
+# Source core modules with error checking
+for module in colors.sh logger.sh spinner.sh; do
+	if [[ -f "$SRC_DIR/$module" ]]; then
+		source "$SRC_DIR/$module"
+	else
+		echo "Error: Required core module $SRC_DIR/$module not found" >&2
+		exit 1
+	fi
+done
 
-# Source functional modules
-source "$SRC_DIR/ui.sh"
-source "$SRC_DIR/prompts.sh"
-source "$SRC_DIR/backup.sh"
-source "$SRC_DIR/install.sh"
-source "$SRC_DIR/symlinks.sh"
-source "$SRC_DIR/permissions.sh"
-source "$SRC_DIR/git.sh"
-source "$SRC_DIR/applications.sh"
-source "$SRC_DIR/wsl.sh"
-source "$SRC_DIR/nixos.sh"
-source "$SRC_DIR/main.sh"
+# Source functional modules with error checking
+for module in ui.sh prompts.sh backup.sh install.sh symlinks.sh permissions.sh git.sh applications.sh wsl.sh nixos.sh main.sh; do
+	if [[ -f "$SRC_DIR/$module" ]]; then
+		source "$SRC_DIR/$module"
+	else
+		echo "Warning: Optional module $SRC_DIR/$module not found, skipping..." >&2
+	fi
+done
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do

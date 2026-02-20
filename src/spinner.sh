@@ -84,7 +84,8 @@ spinner_start() {
 	
 	# Hide cursor and disable job control messages
 	tput civis 2>/dev/null || true
-	set +m 2>/dev/null || true  # Disable job control messages
+	# Only disable job control in interactive shells
+	[[ $- == *i* ]] && set +m 2>/dev/null || true
 	
 	# Background spinner process
 	{
@@ -127,7 +128,8 @@ spinner_stop() {
 	
 	# Show cursor and restore job control
 	tput cnorm 2>/dev/null || true
-	set -m 2>/dev/null || true  # Re-enable job control messages
+	# Only re-enable job control in interactive shells
+	[[ $- == *i* ]] && set -m 2>/dev/null || true
 	
 	# Print completion message
 	if [[ $exit_code -eq 0 ]]; then
@@ -216,7 +218,8 @@ spinner_task() {
 	
 	# Restore cursor and job control
 	tput cnorm 2>/dev/null || true
-	set -m 2>/dev/null || true  # Re-enable job control messages
+	# Only re-enable job control in interactive shells
+	[[ $- == *i* ]] && set -m 2>/dev/null || true
 	
 	# Show final result on a clean line
 	if [[ $exit_code -eq 0 ]]; then
@@ -254,7 +257,8 @@ spinner_cleanup() {
 		unset SPINNER_PID_FILE
 	fi
 	tput cnorm 2>/dev/null || true
-	set -m 2>/dev/null || true  # Re-enable job control messages
+	# Only re-enable job control in interactive shells
+	[[ $- == *i* ]] && set -m 2>/dev/null || true
 }
 
 # Set up cleanup trap
