@@ -5,7 +5,7 @@ if [[ -z "$__LOGGER_SOURCED" ]] && [[ -f "$BASH_CONFIG_DIR/core/logger.sh" ]]; t
     source "$BASH_CONFIG_DIR/core/logger.sh"
 fi
 
-# --- fzf Fuzzy History Search (Ctrl-R) ---
+# --- fzf Fuzzy History Search ---
 fzf_history_search() {
   log_func_start "fzf_history_search"
   if ! command -v fzf >/dev/null 2>&1; then
@@ -40,13 +40,4 @@ fzf_history_search() {
   log_func_end "fzf_history_search"
 }
 
-# Only bind fzf history search for interactive shells if fzf is available
-if [[ $- == *i* ]] && command -v fzf >/dev/null 2>&1 && [[ -z "$FZF_HISTORY_BOUND" ]]; then
-    log_debug "Configuring fzf history search for interactive shell"
-    # Unbind any previous Ctrl-R
-    bind -r "\C-r" 2>/dev/null
-    # Bind our custom widget
-    bind -x '"\C-r": fzf_history_search'
-    log_info "fzf history search enabled (Ctrl-R)"
-    export FZF_HISTORY_BOUND=1
-fi
+alias f='fzf_history_search'
