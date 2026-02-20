@@ -241,6 +241,6 @@ Potential improvements:
 ## Related Files
 
 - [config.md](config.md) - Configuration system
-- [README.md](../README.md) - Main documentation
+- [README.md](../../README.md) - Main documentation
 - [tests.md](tests.md) - Testing information
 - [completion/autocomplete.sh](../completion/autocomplete.sh) - Source code

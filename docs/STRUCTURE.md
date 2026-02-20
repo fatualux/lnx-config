@@ -132,17 +132,14 @@
 │   │   │   └── themes.md
 │   │   └── functions/
 │   │       └── OVERVIEW.md
-│   ├── CHANGELOG.md
 │   ├── copilot-instructions.md
 │   ├── nvim.md
 │   ├── nvim-structure.md
-│   ├── README.md
 │   ├── STRUCTURE.md
 │   └── tests.md
 ├── LICENSE
 ├── main.sh
 ├── quick-reference.sh
-├── README.md
 ├── run_all_tests.sh
 ├── scripts/
 │   └── make-dir-tree.sh

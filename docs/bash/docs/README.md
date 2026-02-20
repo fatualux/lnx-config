@@ -12,10 +12,10 @@ This project provides a modular Bash configuration system that loads core utilit
    - Set BASH_THEME to one of: default, minimal, compact, developer, rainbow
 
 ## Directory Overviews
+- [modules-overview.md](modules-overview.md) - Complete overview of all bash modules
 - [.github.md](.github.md)
-- [aliases.md](aliases.md)
+- [completion.md](completion.md)
 - [config.md](config.md)
-- [core.md](core.md)
 - [docs.md](docs.md)
 - [functions.md](functions.md)
 - [functions/aliases.md](functions/aliases.md)
@@ -23,10 +23,9 @@ This project provides a modular Bash configuration system that loads core utilit
 - [functions/docker.md](functions/docker.md)
 - [functions/filesystem.md](functions/filesystem.md)
 - [functions/music.md](functions/music.md)
-- [integrations.md](integrations.md)
 - [tests.md](tests.md)
 - [tests/logs.md](tests/logs.md)
-- [themes.md](themes.md)
+- [COMPLETION_QUICKSTART.md](COMPLETION_QUICKSTART.md)
 
 ## Notes
 - The loader in main.sh auto-sources all .sh files in each category.
