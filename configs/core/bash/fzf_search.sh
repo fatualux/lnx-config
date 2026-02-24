@@ -7,11 +7,9 @@ fi
 
 # --- fzf Fuzzy History Search ---
 fzf_history_search() {
-  log_func_start "fzf_history_search"
   if ! command -v fzf >/dev/null 2>&1; then
     log_warn "fzf not installed, using default Ctrl-R"
     bind '"\C-r": reverse-search-history'
-    log_func_end "fzf_history_search"
     return 127
   fi
 
@@ -37,7 +35,6 @@ fzf_history_search() {
   else
     log_debug "No command selected"
   fi
-  log_func_end "fzf_history_search"
 }
 
 # Interactive fzf search function (for direct execution)

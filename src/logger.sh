@@ -6,7 +6,7 @@
 # Logger module - centralized logging system for bash configuration
 # Usage: source this file after sourcing colors.sh
 
-# Source colors if not already loaded - with multiple fallback paths
+# Source unified colors if not already loaded
 if [ -z "$COLOR_GREEN" ]; then
     _source_colors() {
         local color_paths=(
@@ -25,23 +25,17 @@ if [ -z "$COLOR_GREEN" ]; then
             fi
         done
 
-        # If colors not found, define minimal fallback colors
-        readonly COLOR_BLACK='\033[0;30m'
-        readonly COLOR_RED='\033[0;31m'
-        readonly COLOR_GREEN='\033[0;32m'
-        readonly COLOR_YELLOW='\033[0;33m'
-        readonly COLOR_BLUE='\033[0;34m'
-        readonly COLOR_MAGENTA='\033[0;35m'
-        readonly COLOR_CYAN='\033[0;36m'
-        readonly COLOR_WHITE='\033[0;37m'
-        readonly COLOR_BOLD_RED='\033[1;31m'
-        readonly COLOR_BOLD_GREEN='\033[1;32m'
-        readonly COLOR_BOLD_CYAN='\033[1;36m'
-        readonly COLOR_BOLD_YELLOW='\033[1;33m'
-        readonly COLOR_DIM='\033[2m'
-        readonly NC='\033[0m'
-        readonly COLOR_BG_BLACK='\033[40m'
-        readonly CHAR_CHECKMARK='[OK] '
+        # If unified colors not found, define minimal fallback colors
+        COLOR_BLACK='\033[0;30m'
+        COLOR_RED='\033[0;31m'
+        COLOR_GREEN='\033[0;32m'
+        COLOR_YELLOW='\033[0;33m'
+        COLOR_BLUE='\033[0;34m'
+        COLOR_MAGENTA='\033[0;35m'
+        COLOR_CYAN='\033[0;36m'
+        COLOR_WHITE='\033[0;37m'
+        COLOR_BOLD='\033[1m'
+        NC='\033[0m'
         readonly CHAR_CROSS='[X]'
         readonly CHAR_WARNING='[!]'
         readonly CHAR_INFO='[i] '

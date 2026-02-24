@@ -19,9 +19,39 @@ CUSTOM_CONFIG_DIR="$CONFIG_SOURCE_DIR/custom"
 CORE_BASH_DIR="$CONFIG_SOURCE_DIR/core/bash"
 CORE_VIM_DIR="$CONFIG_SOURCE_DIR/core/vim"
 SRC_DIR="$SCRIPT_DIR/src"
+MAX_BACKUPS=5  # Keep only 5 most recent backups
+
+# Validate configuration
+if [[ "$MAX_BACKUPS" -lt 1 ]] || [[ "$MAX_BACKUPS" -gt 50 ]]; then
+    echo "Error: MAX_BACKUPS must be between 1 and 50. Current value: $MAX_BACKUPS"
+    exit 1
+fi
 
 # Files to backup
 BACKUP_FILES=("$HOME/.config" "$HOME/.bashrc" "$HOME/.vimrc")
+
+# Function to clean old backups
+clean_old_backups() {
+    local backups_dir="$SCRIPT_DIR/backups"
+    
+    if [[ ! -d "$backups_dir" ]]; then
+        return 0
+    fi
+    
+    log_info "Cleaning old backups (keeping latest $MAX_BACKUPS)"
+    
+    # Use subshell to avoid changing working directory
+    local backup_count removed_count
+    backup_count=$(find "$backups_dir" -maxdepth 1 -type d -name "??-??-??_??-??-??" 2>/dev/null | wc -l)
+    
+    if [[ "$backup_count" -gt "$MAX_BACKUPS" ]]; then
+        # Find and remove old backups using absolute paths
+        removed_count=$(find "$backups_dir" -maxdepth 1 -type d -name "??-??-??_??-??-??" -printf "%T@ %p\n" 2>/dev/null | sort -n | head -n -$MAX_BACKUPS | cut -d' ' -f2- | xargs -r rm -rf | wc -l)
+        log_success "Removed $removed_count old backup(s)"
+    else
+        log_info "No cleanup needed (have $backup_count backups, limit is $MAX_BACKUPS)"
+    fi
+}
 
 # Function to create backup directory
 create_backup_dir() {
@@ -263,6 +293,7 @@ main() {
     fi
     
     # Execute installation steps
+    clean_old_backups
     create_backup_dir
     backup_files
     remove_existing_configs

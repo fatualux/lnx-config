@@ -82,10 +82,11 @@ spinner_start() {
 	local frames=("${FRAME[@]}")
 	local interval="$FRAME_INTERVAL"
 	
-	# Hide cursor and disable job control messages
-	tput civis 2>/dev/null || true
-	# Only disable job control in interactive shells
-	[[ $- == *i* ]] && set +m 2>/dev/null || true
+	# Hide cursor and disable job control messages (only in interactive shells)
+	if [[ $- == *i* ]] && [[ -z "${IN_BATS_TEST:-}" ]]; then
+		tput civis 2>/dev/null || true
+		set +m 2>/dev/null || true
+	fi
 	
 	# Background spinner process
 	{
@@ -126,10 +127,11 @@ spinner_stop() {
 		unset SPINNER_PID_FILE
 	fi
 	
-	# Show cursor and restore job control
-	tput cnorm 2>/dev/null || true
-	# Only re-enable job control in interactive shells
-	[[ $- == *i* ]] && set -m 2>/dev/null || true
+	# Show cursor and restore job control (only in interactive shells)
+	if [[ $- == *i* ]] && [[ -z "${IN_BATS_TEST:-}" ]]; then
+		tput cnorm 2>/dev/null || true
+		set -m 2>/dev/null || true
+	fi
 	
 	# Print completion message
 	if [[ $exit_code -eq 0 ]]; then
@@ -175,7 +177,10 @@ spinner_multi_start() {
 	export SPINNER_TASK_COUNT=0
 	export SPINNER_TASK_SUCCESS=0
 	export SPINNER_TASK_FAILED=0
-	tput civis 2>/dev/null || true
+	# Hide cursor (only in interactive shells)
+	if [[ $- == *i* ]] && [[ -z "${IN_BATS_TEST:-}" ]]; then
+		tput civis 2>/dev/null || true
+	fi
 }
 
 spinner_task() {
@@ -216,10 +221,11 @@ spinner_task() {
 	# Clear the spinner line completely
 	printf "\r${CLEAR_LINE}"
 	
-	# Restore cursor and job control
-	tput cnorm 2>/dev/null || true
-	# Only re-enable job control in interactive shells
-	[[ $- == *i* ]] && set -m 2>/dev/null || true
+	# Restore cursor and job control (only in interactive shells)
+	if [[ $- == *i* ]] && [[ -z "${IN_BATS_TEST:-}" ]]; then
+		tput cnorm 2>/dev/null || true
+		set -m 2>/dev/null || true
+	fi
 	
 	# Show final result on a clean line
 	if [[ $exit_code -eq 0 ]]; then
@@ -235,7 +241,10 @@ spinner_task() {
 
 spinner_multi_finish() {
 	local CLEAR_LINE="\033[K"
-	tput cnorm 2>/dev/null || true
+	# Restore cursor (only in interactive shells)
+	if [[ $- == *i* ]] && [[ -z "${IN_BATS_TEST:-}" ]]; then
+		tput cnorm 2>/dev/null || true
+	fi
 	
 	if [[ ${SPINNER_TASK_FAILED:-0} -eq 0 ]]; then
 		printf "\n${COLOR_GREEN}All tasks completed successfully!${NC} (${SPINNER_TASK_SUCCESS}/${SPINNER_TASK_COUNT})${CLEAR_LINE}\n"
@@ -246,19 +255,19 @@ spinner_multi_finish() {
 	unset SPINNER_TASK_COUNT SPINNER_TASK_SUCCESS SPINNER_TASK_FAILED
 }
 
-# Cleanup function for trapped exits
+# Cleanup function for trapped exits (only in interactive shells)
 spinner_cleanup() {
 	if [[ -n "${SPINNER_PID_FILE:-}" && -f "$SPINNER_PID_FILE" ]]; then
 		local spinner_pid
 		spinner_pid=$(<"$SPINNER_PID_FILE")
-		rm -f "$SPINNER_PID_FILE"
-		kill "$spinner_pid" 2>/dev/null || true
 		wait "$spinner_pid" 2>/dev/null || true
 		unset SPINNER_PID_FILE
 	fi
-	tput cnorm 2>/dev/null || true
-	# Only re-enable job control in interactive shells
-	[[ $- == *i* ]] && set -m 2>/dev/null || true
+	# Restore cursor (only in interactive shells)
+	if [[ $- == *i* ]] && [[ -z "${IN_BATS_TEST:-}" ]]; then
+		tput cnorm 2>/dev/null || true
+		set -m 2>/dev/null || true
+	fi
 }
 
 # Set up cleanup trap

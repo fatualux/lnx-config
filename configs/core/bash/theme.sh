@@ -1,18 +1,27 @@
 #!/bin/bash
 
 # Bash Theme Configuration
-# Color definitions - all different colors
-C_USER='\[\033[1;34m\]'      # Blue
-C_HOST='\[\033[1;32m\]'      # Green  
-C_IP='\[\033[1;35m\]'        # Magenta
-C_PATH='\[\033[1;36m\]'      # Cyan
-C_VENV='\[\033[1;33m\]'      # Yellow
-C_BRANCH='\[\033[1;31m\]'    # Red
-C_AHEAD='\[\033[1;33m\]'     # Yellow (ahead)
-C_BEHIND='\[\033[1;32m\]'    # Green (behind)
-C_COMMIT='\[\033[1;35m\]'    # Magenta (files to commit)
-C_SYMBOL='\[\033[1;37m\]'    # White
-C_RESET='\[\033[0m\]'        # Reset
+# Source unified colors with robust fallback handling
+if [[ -n "${SCRIPT_DIR:-}" ]] && [[ -f "$SCRIPT_DIR/src/colors.sh" ]]; then
+    source "$SCRIPT_DIR/src/colors.sh"
+elif [[ -f "${BASH_CONFIG_DIR:-$HOME/.config/bash}/colors.sh" ]]; then
+    source "${BASH_CONFIG_DIR:-$HOME/.config/bash}/colors.sh"
+elif [[ -f "$HOME/.config/bash/colors.sh" ]]; then
+    source "$HOME/.config/bash/colors.sh"
+else
+    # Fallback color definitions only if unified colors not available
+    C_USER='\[\033[1;34m\]'      # Blue
+    C_HOST='\[\033[1;32m\]'      # Green  
+    C_IP='\[\033[1;35m\]'        # Magenta
+    C_PATH='\[\033[1;36m\]'      # Cyan
+    C_VENV='\[\033[1;33m\]'      # Yellow
+    C_BRANCH='\[\033[1;31m\]'    # Red
+    C_AHEAD='\[\033[1;33m\]'     # Yellow (ahead)
+    C_BEHIND='\[\033[1;32m\]'    # Green (behind)
+    C_COMMIT='\[\033[1;35m\]'    # Magenta (files to commit)
+    C_SYMBOL='\[\033[1;37m\]'    # White
+    C_RESET='\[\033[0m\]'        # Reset
+fi
 
 # Cache IP address to avoid repeated hostname calls
 __CACHED_IP_ADDRESS=""
@@ -85,7 +94,7 @@ set_prompt() {
     ip_addr=$(get_ip_address)
 
     # Line 1: user - host - ip_address
-    PS1=".:[ ${C_USER}\\u${C_RESET} ]"
+    PS1="[ ${C_USER}\\u${C_RESET} ]"
     PS1+=" ${C_SYMBOL}-${C_RESET} "
     PS1+="[ ${C_HOST}\\h${C_RESET} ]"
     PS1+=" ${C_SYMBOL}-${C_RESET} "
@@ -120,7 +129,7 @@ set_prompt() {
         local files_to_push=$(( staged + unstaged ))
 
         # Format: [branch_name: to_pull - to_push]
-        PS1+=".:[ ${C_PATH}$PWD${C_RESET} ]"
+        PS1+="[ ${C_PATH}$PWD${C_RESET} ]"
         PS1+=" ${C_SYMBOL}-${C_RESET} "
         PS1+="[ ${C_BRANCH}${branch}${C_RESET} ]"
         PS1+="${C_SYMBOL} ${C_RESET}"
@@ -152,7 +161,7 @@ set_prompt() {
     fi
 
     # Add prompt symbol
-    PS1+="\n:.${C_SYMBOL} >> ${C_RESET}"
+    PS1+="\n${C_SYMBOL} >> ${C_RESET}"
 }
 
 # Store original PROMPT_COMMAND before theme loads

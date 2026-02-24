@@ -11,7 +11,6 @@ if [[ -z "$__SPINNER_SOURCED" ]] && [[ -f "$BASH_CONFIG_DIR/core/spinner.sh" ]];
 fi
 
 start_docker() {
-  log_func_start "start_docker"
   log_docker_starting
   DOCKER_SOCK=/var/run/docker.sock
   MAX_WAIT=30
@@ -45,13 +44,11 @@ start_docker() {
     log_docker_failed
     log_error "Docker socket not ready after ${MAX_WAIT}s. Check ~/dockerd.log for details"
     tail -20 ~/dockerd.log | sed 's/^/  /'
-    log_func_end "start_docker"
     return 1
   fi
 
   log_info "Starting kind containers..."
   spinner_task "Starting kind nodes" docker ps -a --format '{{.ID}} {{.Image}}' | awk '$2 ~ /kindest\/node/ {print $1}' | xargs -r docker start
-  log_func_end "start_docker"
 }
 
 is_docker_running() {
@@ -63,7 +60,6 @@ docker_manager() {
   
   if ! command -v docker &>/dev/null; then
     log_error "Docker is not installed"
-    log_func_end "docker_manager"
     return 1
   fi
 
@@ -74,7 +70,6 @@ docker_manager() {
     log_docker_not_running
     start_docker
   fi
-  log_func_end "docker_manager"
 }
 
 # Only initialize Docker manager if not already running and command exists

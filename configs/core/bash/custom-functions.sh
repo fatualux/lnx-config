@@ -1,7 +1,6 @@
 #!/bin/bash
 
 list_my_aliases() {
-	log_func_start "list_my_aliases"
 	# Use BASH_CONFIG_DIR to find alias file in current installation
 	local alias_file="${BASH_CONFIG_DIR:-$HOME/.lnx-config/configs/bash}/aliases/alias.sh"
 	
@@ -12,12 +11,10 @@ list_my_aliases() {
 	
 	log_section "Custom Aliases from $alias_file"
 	cat "$alias_file" | sed "s/alias //g" | awk -F= '{printf "\033[1;34m%-20s\033[0m = \033[1;32m%s\033[0m\n", $1, $2}'
-	log_func_end "list_my_aliases"
 }
 
 
 code_directory() {
-	log_func_start "code_directory"
 	local chosen_dir
 	log_debug "Searching for directories with fzf"
 	chosen_dir=$(find . -maxdepth 1 -type d | fzf --height 40% --preview 'tree -C {}' --ansi)
@@ -28,7 +25,6 @@ code_directory() {
 	else
 		log_warn "No directory selected"
 	fi
-	log_func_end "code_directory"
 }
 
 
@@ -85,60 +81,48 @@ recursive_cat() {
 
 
 docker_compose_file() {
-	log_func_start "docker_compose_file"
 	if [[ -z "$1" ]]; then
 		log_error "Usage: docker_compose_file <docker-compose-file>"
-		log_func_end "docker_compose_file"
 		return 1
 	fi
 	log_cmd "docker compose --file $*"
 	log_file_found "$1"
 	docker compose --file "$1" "${@:2}"
 	log_success "Executed: docker compose --file $*"
-	log_func_end "docker_compose_file"
 }
 
 
 docker_compose_wrapper() {
-	log_func_start "docker_compose_wrapper"
 	log_cmd "docker compose $*"
 	docker compose "$@"
 	log_success "Executed: docker compose $*"
-	log_func_end "docker_compose_wrapper"
 }
 
 
 docker_container_prune_force() {
-	log_func_start "docker_container_prune_force"
 	log_cmd "docker container prune -f"
 	log_process_start "Pruning Docker containers"
 	docker container prune -f
 	log_process_complete "Docker containers pruned"
-	log_func_end "docker_container_prune_force"
 }
 
 docker_network_prune_force() {
-	log_func_start "docker_network_prune_force"
 	log_cmd "docker network prune -f"
 	log_process_start "Pruning Docker networks"
 	docker network prune -f
 	log_process_complete "Docker networks pruned"
-	log_func_end "docker_network_prune_force"
 }
 
 
 docker_system_prune_force() {
-	log_func_start "docker_system_prune_force"
 	log_cmd "docker system prune"
 	log_process_start "Pruning Docker system"
 	docker system prune
 	log_process_complete "Docker system pruned"
-	log_func_end "docker_system_prune_force"
 }
 
 
 kill_docker_containers() {
-	log_func_start "kill_docker_containers"
 	log_process_start "Stopping and removing all Docker containers"
 	local containers
 	log_debug "Fetching list of all containers"
@@ -146,7 +130,6 @@ kill_docker_containers() {
 
 	if [ -z "$containers" ]; then
 		log_info "No containers to stop and remove"
-		log_func_end "kill_docker_containers"
 		return
 	fi
 
@@ -174,13 +157,12 @@ kill_docker_containers() {
 	done
 	
 	log_process_complete "All containers stopped and removed"
-	log_func_end "kill_docker_containers"
 }
 
 
 clear_python_caches() {
-	if command -v log_func_start >/dev/null 2>&1; then
-		log_func_start "clear_python_caches"
+	if command -v log_process_start >/dev/null 2>&1; then
+		log_process_start "Clearing Python caches"
 	fi
 	if command -v log_process_start >/dev/null 2>&1; then
 		log_process_start "Clearing Python caches"
@@ -196,14 +178,10 @@ clear_python_caches() {
 	if command -v log_process_complete >/dev/null 2>&1; then
 		log_process_complete "Python caches cleared"
 	fi
-	if command -v log_func_end >/dev/null 2>&1; then
-		log_func_end "clear_python_caches"
-	fi
 }
 
 
 add_track_to_playlist() {
-	log_func_start "add_track_to_playlist"
 	local PID FILE PLAYLIST
 	PLAYLIST="/mnt/c/Users/100700092024/Music/fz/_favourites.m3u"
 	log_debug "Finding MPV process"
@@ -211,7 +189,6 @@ add_track_to_playlist() {
 
 	if [ -z "$PID" ]; then
 		log_warn "No MPV instance is currently running"
-		log_func_end "add_track_to_playlist"
 		return 1
 	fi
 
@@ -223,14 +200,12 @@ add_track_to_playlist() {
 
 	if [ -z "$FILE" ]; then
 		log_error "Could not determine the currently playing file"
-		log_func_end "add_track_to_playlist"
 		return 1
 	fi
 
 	log_debug "Adding $(basename "$FILE") to playlist $PLAYLIST"
 	echo "./$(basename "$FILE")" >>"$PLAYLIST"
 	log_success "Added to playlist: $(basename "$FILE")"
-	log_func_end "add_track_to_playlist"
 }
 
 
@@ -247,14 +222,12 @@ alias pms='play_music_shuffle'
 
 
 remove_currently_playing_track() {
-	log_func_start "remove_currently_playing_track"
 	local PID FILE
 	log_debug "Finding MPV process"
 	PID=$(pidof mpv)
 
 	if [ -z "$PID" ]; then
 		log_warn "No MPV instance is currently running"
-		log_func_end "remove_currently_playing_track"
 		return 1
 	fi
 
@@ -266,7 +239,6 @@ remove_currently_playing_track() {
 
 	if [ -z "$FILE" ]; then
 		log_error "Could not determine the currently playing file"
-		log_func_end "remove_currently_playing_track"
 		return 1
 	fi
 
@@ -285,5 +257,4 @@ remove_currently_playing_track() {
 	else
 		log_file_not_found "$FILE"
 	fi
-	log_func_end "remove_currently_playing_track"
 }
