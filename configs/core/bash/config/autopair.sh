@@ -5,20 +5,6 @@
 # Enable/disable auto-pairing
 AUTO_PAIR_ENABLED=true
 
-# Function to insert paired character
-insert_pair() {
-    local char="$1"
-    
-    case "$char" in
-        '"') echo -n '""' ;;
-        "'") echo -n "''" ;;
-        '(') echo -n "()" ;;
-        '[') echo -n "[]" ;;
-        '{') echo -n "{}" ;;
-        *) echo -n "$char" ;;
-    esac
-}
-
 # Function to toggle auto-pairing
 toggle_autopair() {
     if [[ "$AUTO_PAIR_ENABLED" == "true" ]]; then
@@ -39,36 +25,46 @@ show_autopair_status() {
     fi
 }
 
-# Simple setup without complex key bindings
-setup_autopair() {
-    if [[ "$AUTO_PAIR_ENABLED" == "true" ]]; then
-        echo "Auto-pairing enabled"
-        echo "Note: For full auto-pairing functionality, consider:"
-        echo "  - Using zsh with zsh-autopair plugin"
-        echo "  - Using a terminal with built-in auto-pairing"
-        echo "  - Using readline-based solutions"
-        echo ""
-        echo "Current helper functions available:"
-        echo "  pair-double()  - inserts \"\""
-        echo "  pair-single()  - inserts ''"
-        echo "  pair-round()   - inserts ()"
-        echo "  pair-square()  - inserts []"
-        echo "  pair-curly()   - inserts {}"
-    fi
-}
-
-# Setup auto-pairing when script is sourced
-setup_autopair
-
 # Add aliases for convenience
 alias pair-toggle='toggle_autopair'
 alias pair-status='show_autopair_status'
-alias pair-on='AUTO_PAIR_ENABLED=true; setup_autopair; echo "Auto-pairing enabled"'
+alias pair-on='AUTO_PAIR_ENABLED=true; echo "Auto-pairing enabled"'
 alias pair-off='AUTO_PAIR_ENABLED=false; echo "Auto-pairing disabled"'
 
-# Additional helper functions for direct use
-pair-double() { echo -n '""'; }
-pair-single() { echo -n "''"; }
-pair-round() { echo -n "()"; }
-pair-square() { echo -n "[]"; }
-pair-curly() { echo -n "{}"; }
+# Practical helper functions that work with bash
+# These create paired characters that you can copy/paste or use in scripts
+pair-double() { echo '""'; }
+pair-single() { echo "''"; }
+pair-round() { echo '()'; }
+pair-square() { echo '[]'; }
+pair-curly() { echo '{}'; }
+
+# More practical approach: create functions that output paired characters
+# and can be used with command substitution
+pd() { printf '""'; }
+ps() { printf "''"; }
+pr() { printf '()'; }
+pb() { printf '[]'; }
+pc() { printf '{}'; }
+
+# Create wrapper functions that can be used with $(command) syntax
+# Example: echo $(pd) will output ""
+quote-double() { printf '""'; }
+quote-single() { printf "''"; }
+bracket-round() { printf '()'; }
+bracket-square() { printf '[]'; }
+bracket-curly() { printf '{}'; }
+
+# Setup message
+if [[ "$AUTO_PAIR_ENABLED" == "true" ]]; then
+    echo "Auto-pairing helper functions loaded"
+    echo "Usage examples:"
+    echo "  echo \$(pd)    -> outputs \"\""
+    echo "  echo \$(ps)    -> outputs ''"
+    echo "  echo \$(pr)    -> outputs ()"
+    echo "  echo \$(pb)    -> outputs []"
+    echo "  echo \$(pc)    -> outputs {}"
+    echo ""
+    echo "Short aliases: pd, ps, pr, pb, pc"
+    echo "Long aliases: quote-double, quote-single, bracket-round, bracket-square, bracket-curly"
+fi
