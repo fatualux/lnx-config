@@ -58,14 +58,49 @@ EOF
 # Alternative approach: Use bash's builtin 'bind' with proper syntax
 bind_autopair() {
     if [[ "$AUTO_PAIR_ENABLED" == "true" ]]; then
-        # These bindings work with bash readline
-        bind '"\"": "\"\"\C-b"' 2>/dev/null
-        bind "\"'\": ''\C-b" 2>/dev/null
-        bind '"(": "()\C-b"' 2>/dev/null
-        bind '"[": "[]\C-b"' 2>/dev/null
-        bind '"{": "{}\C-b"' 2>/dev/null
+        # Use different approach - bind to control sequences instead of direct characters
+        # This avoids the recursion issue
+        
+        # Create functions that insert paired characters
+        insert_double_quotes() {
+            READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}\"\"${READLINE_LINE:$READLINE_POINT}"
+            READLINE_POINT=$((READLINE_POINT + 1))
+        }
+        
+        insert_single_quotes() {
+            READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}''${READLINE_LINE:$READLINE_POINT}"
+            READLINE_POINT=$((READLINE_POINT + 1))
+        }
+        
+        insert_parens() {
+            READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}()${READLINE_LINE:$READLINE_POINT}"
+            READLINE_POINT=$((READLINE_POINT + 1))
+        }
+        
+        insert_brackets() {
+            READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}[]${READLINE_LINE:$READLINE_POINT}"
+            READLINE_POINT=$((READLINE_POINT + 1))
+        }
+        
+        insert_braces() {
+            READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}{}${READLINE_LINE:$READLINE_POINT}"
+            READLINE_POINT=$((READLINE_POINT + 1))
+        }
+        
+        # Bind control sequences to these functions
+        bind -x '"\C-x\"": insert_double_quotes' 2>/dev/null
+        bind -x '"\C-x\'": insert_single_quotes' 2>/dev/null
+        bind -x '"\C-x(": insert_parens' 2>/dev/null
+        bind -x '"\C-x[": insert_brackets' 2>/dev/null
+        bind -x '"\C-x{": insert_braces' 2>/dev/null
         
         echo "Bash readline auto-pairing enabled"
+        echo "Use Ctrl+X + character for auto-pairing:"
+        echo "  Ctrl+X + \"  -> inserts \"\""
+        echo "  Ctrl+X + '  -> inserts ''"
+        echo "  Ctrl+X + (  -> inserts ()"
+        echo "  Ctrl+X + [  -> inserts []"
+        echo "  Ctrl+X + {  -> inserts {}"
     fi
 }
 
