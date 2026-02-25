@@ -8,7 +8,6 @@ show_welcome() {
     cat << "EOF"
 
 ［  ＬＮＸ  －  ＣＯＮＦＩＧ  ］
-                                                   
                                                 
 EOF
     echo -e "${NC}"
