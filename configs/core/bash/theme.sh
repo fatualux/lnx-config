@@ -100,10 +100,13 @@ set_prompt() {
     PS1+=" ${C_SYMBOL}-${C_RESET} "
     PS1+="[ ${C_IP}${ip_addr}${C_RESET} ]"
 
-    # Line 2: [branch_name: to_pull - to_push] - (.venv_name)
+    # Line 2: [current_directory] [branch_name: to_pull - to_push] - (.venv_name)
     PS1+="\n"
 
-    # Git info first
+    # Always show current directory
+    PS1+="[ ${C_PATH}$PWD${C_RESET} ]"
+
+    # Git info
     if is_git_repo; then
         local branch
         branch=$(get_git_branch)
@@ -128,8 +131,7 @@ set_prompt() {
         local files_to_pull=$(( ahead + behind ))
         local files_to_push=$(( staged + unstaged ))
 
-        # Format: [branch_name: to_pull - to_push]
-        PS1+="[ ${C_PATH}$PWD${C_RESET} ]"
+        # Add git info after directory
         PS1+=" ${C_SYMBOL}-${C_RESET} "
         PS1+="[ ${C_BRANCH}${branch}${C_RESET} ]"
         PS1+="${C_SYMBOL} ${C_RESET}"
