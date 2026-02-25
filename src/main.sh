@@ -6,13 +6,10 @@
 show_welcome() {
     echo -e "${COLOR_CYAN}"
     cat << "EOF"
- _           _   _                 _            
-| |         | | |               | |           
-| |     __ _| |_| |__   __ _  ___| | _____ _ __ 
-| |    / _` | __| '_ \ / _` |/ __| |/ / _ \ '__|
-| |___| (_| | |_| | | | (_| | (__|   <  __/ |   
-|______\__,_|\__|_| |_|\__,_|\___|_|\_\___|_|   
+
+［  ＬＮＸ  －  ＣＯＮＦＩＧ  ］
                                                    
+                                                
 EOF
     echo -e "${NC}"
     echo -e "${COLOR_CYAN}Linux Configuration Auto-Installer v$VERSION${NC}"
