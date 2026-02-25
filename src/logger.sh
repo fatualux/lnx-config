@@ -6,15 +6,14 @@
 # Logger module - centralized logging system for bash configuration
 # Usage: source this file after sourcing colors.sh
 
-# Source unified colors if not already loaded
+# Source unified colors if not already loaded (optimized)
 if [ -z "$COLOR_GREEN" ]; then
     _source_colors() {
+        # Optimized color paths - most likely locations first
         local color_paths=(
-            "${BASH_SOURCE%/*}/colors.sh"
             "$(dirname "${BASH_SOURCE[0]}")/colors.sh"
+            "${BASH_SOURCE%/*}/colors.sh"
             "$HOME/.config/bash/colors.sh"
-            "$HOME/.bashrc.d/colors.sh"
-            "/etc/bash/colors.sh"
             "./colors.sh"
         )
 

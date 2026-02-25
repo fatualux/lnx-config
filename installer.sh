@@ -14,23 +14,68 @@ user_email=""
 export LOG_LEVEL=0
 export LOG_TIMESTAMP=true
 
-# Source core modules with error checking
-for module in colors.sh logger.sh spinner.sh; do
-	if [[ -f "$SRC_DIR/$module" ]]; then
-		source "$SRC_DIR/$module"
+# Module loading cache to prevent re-sourcing
+__LOADED_MODULES=()
+
+# Function to load module with caching
+load_module() {
+	local module="$1"
+	local module_path="$SRC_DIR/$module"
+	
+	# Check if module is already loaded
+	for loaded in "${__LOADED_MODULES[@]}"; do
+		if [[ "$loaded" == "$module" ]]; then
+			return 0
+		fi
+	done
+	
+	# Load the module
+	if [[ -f "$module_path" ]]; then
+		source "$module_path"
+		__LOADED_MODULES+=("$module")
 	else
-		echo "Error: Required core module $SRC_DIR/$module not found" >&2
+		echo "Error: Required module $module_path not found" >&2
 		exit 1
 	fi
-done
+}
 
-# Source functional modules with error checking
+# Function to load modules in parallel
+load_modules_parallel() {
+	local modules=("$@")
+	local pids=()
+	
+	# Load independent modules in parallel
+	for module in "${modules[@]}"; do
+		if [[ -f "$SRC_DIR/$module" ]]; then
+			(
+				load_module "$module"
+			) &
+			pids+=("$!")
+		else
+			echo "Warning: Optional module $SRC_DIR/$module not found, skipping..." >&2
+		fi
+	done
+	
+	# Wait for all parallel loading to complete
+	for pid in "${pids[@]}"; do
+		wait "$pid"
+	done
+}
+
+# Source core modules with proper dependency order and caching
+echo "Loading core modules..." >&2
+
+# Load critical dependencies sequentially to ensure proper order
+load_module "colors.sh"
+load_module "logger.sh"
+
+# Load spinner.sh in parallel (only depends on colors.sh)
+load_modules_parallel spinner.sh
+
+# Source functional modules with caching
+echo "Loading functional modules..." >&2
 for module in ui.sh prompts.sh backup.sh install.sh symlinks.sh permissions.sh git.sh applications.sh nixos.sh main.sh; do
-	if [[ -f "$SRC_DIR/$module" ]]; then
-		source "$SRC_DIR/$module"
-	else
-		echo "Warning: Optional module $SRC_DIR/$module not found, skipping..." >&2
-	fi
+	load_module "$module"
 done
 
 # Parse command line arguments

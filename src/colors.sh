@@ -2,6 +2,7 @@
 
 # Guard against re-sourcing to prevent readonly variable conflicts
 [[ -n "${__COLORS_SOURCED:-}" ]] && return 0
+
 __COLORS_SOURCED=1
 
 # Theme Colors (for bash prompt)
