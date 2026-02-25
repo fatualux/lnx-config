@@ -271,6 +271,19 @@ create_bashrc() {
     fi
 }
 
+# Function to create .bash_profile
+create_bash_profile() {
+    log_section "Creating .bash_profile"
+    
+    local bash_profile_file="$HOME/.bash_profile"
+    
+    # Create .bash_profile that sources .bashrc
+    log_info "Creating .bash_profile to source .bashrc"
+    echo "source $HOME/.bashrc" > "$bash_profile_file"
+    
+    log_success ".bash_profile created to source .bashrc"
+}
+
 # Function to display summary
 display_summary() {
     log_section "Installation Summary"
@@ -278,6 +291,7 @@ display_summary() {
     echo -e "${COLOR_GREEN}✓ Custom configs copied to ~/.config${NC}"
     echo -e "${COLOR_GREEN}✓ .vimrc created${NC}"
     echo -e "${COLOR_GREEN}✓ .bashrc created${NC}"
+    echo -e "${COLOR_GREEN}✓ .bash_profile created${NC}"
     echo ""
     echo -e "${COLOR_CYAN}To apply changes, run: source ~/.bashrc${NC}"
     echo -e "${COLOR_CYAN}Or restart your terminal session${NC}"
@@ -300,6 +314,7 @@ main() {
     copy_custom_configs
     create_vimrc
     create_bashrc
+    create_bash_profile
     display_summary
     
     log_success "Installation completed successfully!"
