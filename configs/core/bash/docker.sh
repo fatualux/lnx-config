@@ -1,15 +1,5 @@
 #!/bin/bash
 
-# Optimize logger sourcing - check if already available first
-if [[ -z "$__LOGGER_SOURCED" ]] && [[ -f "$BASH_CONFIG_DIR/core/logger.sh" ]]; then
-    source "$BASH_CONFIG_DIR/core/logger.sh"
-fi
-
-# Optimize spinner sourcing - check if already available first  
-if [[ -z "$__SPINNER_SOURCED" ]] && [[ -f "$BASH_CONFIG_DIR/core/spinner.sh" ]]; then
-    source "$BASH_CONFIG_DIR/core/spinner.sh"
-fi
-
 start_docker() {
   log_docker_starting
   DOCKER_SOCK=/var/run/docker.sock

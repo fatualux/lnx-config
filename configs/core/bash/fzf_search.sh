@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# Optimize logger sourcing - check if already available first
-if [[ -z "$__LOGGER_SOURCED" ]] && [[ -f "$BASH_CONFIG_DIR/core/logger.sh" ]]; then
-    source "$BASH_CONFIG_DIR/core/logger.sh"
-fi
-
 # --- fzf Fuzzy History Search ---
 fzf_history_search() {
   if ! command -v fzf >/dev/null 2>&1; then
