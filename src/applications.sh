@@ -23,16 +23,14 @@ install_packages() {
     if apt update; then
         log_success "Package lists updated"
     else
-        log_error "Failed to update package lists"
-        return 1
+        log_warn "Failed to update package lists, continuing with installation"
     fi
     
     log_info "Upgrading existing packages..."
     if apt upgrade -y; then
         log_success "Packages upgraded"
     else
-        log_error "Failed to upgrade packages"
-        return 1
+        log_warn "Failed to upgrade packages, continuing with installation"
     fi
     
     log_info "Installing packages from: $apps_file"
@@ -73,8 +71,8 @@ install_packages() {
             if apt install -y "${packages_to_install[@]}"; then
                 log_success "All apt packages installed successfully"
             else
-                log_error "Failed to install some apt packages"
-                return 1
+                log_warn "Failed to install some apt packages, continuing with installation"
+                # Don't return error - continue with installation
             fi
         else
             log_info "All apt packages are already installed"
@@ -116,20 +114,21 @@ install_joshuto() {
         return 0
     fi
     
-    # Create temporary directory for joshuto source
     local temp_dir=$(mktemp -d)
     local joshuto_dir="$temp_dir/joshuto"
     
     # Clone joshuto repository
     if git clone https://github.com/kamiyaa/joshuto.git "$joshuto_dir"; then
-        log_info "Installing joshuto from source..."
-        if (cd "$joshuto_dir" && cargo install --path=. --force --root=/usr/local); then
+        cd "$joshuto_dir"
+        
+        # Build and install joshuto
+        if cargo install --path .; then
             log_success "joshuto installed successfully"
         else
-            log_error "Failed to install joshuto"
+            log_warn "Failed to build joshuto, skipping installation"
         fi
     else
-        log_error "Failed to clone joshuto repository"
+        log_warn "Failed to clone joshuto repository, skipping installation"
     fi
     
     # Clean up temporary directory

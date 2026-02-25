@@ -73,24 +73,24 @@ run_pre_checks() {
 run_installation() {
     log_section "Starting installation"
     
-    # Execute installation steps in order
-    clean_old_backups
-    create_backup_dir
+    # Execute installation steps in order with error handling
+    clean_old_backups || log_warn "Failed to clean old backups, continuing..."
+    create_backup_dir || log_warn "Failed to create backup directory, continuing..."
     # backup_files  # DISABLED - causing massive backup issues
-    remove_existing_configs
-    install_packages
-    copy_custom_configs
-    create_vimrc
-    create_bashrc
-    create_bash_profile
+    remove_existing_configs || log_warn "Failed to remove existing configs, continuing..."
+    install_packages || log_warn "Package installation failed, continuing with other steps..."
+    copy_custom_configs || log_warn "Failed to copy custom configs, continuing..."
+    create_vimrc || log_warn "Failed to create vimrc, continuing..."
+    create_bashrc || log_warn "Failed to create bashrc, continuing..."
+    create_bash_profile || log_warn "Failed to create bash_profile, continuing..."
     
     # Optional steps
     if command -v git &> /dev/null; then
-        configure_git
+        configure_git || log_warn "Failed to configure git, continuing..."
     fi
     
-    fix_script_permissions
-    create_config_symlinks
+    fix_script_permissions || log_warn "Failed to fix script permissions, continuing..."
+    create_config_symlinks || log_warn "Failed to create config symlinks, continuing..."
     
     log_success "Installation completed successfully!"
 }
