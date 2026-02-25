@@ -167,7 +167,7 @@ set_prompt() {
 }
 
 # Store original PROMPT_COMMAND before theme loads
-__ORIGINAL_THEME_PROMPT_COMMAND="$PROMPT_COMMAND"
+__ORIGINAL_THEME_PROMPT_COMMAND="${PROMPT_COMMAND:-}"
 
 # Set up prompt command
 if [[ -n "$__ORIGINAL_THEME_PROMPT_COMMAND" ]]; then

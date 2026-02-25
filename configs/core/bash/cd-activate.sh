@@ -42,7 +42,7 @@ function cd-activate() {
 # Function to activate environments on shell startup and prompt changes
 activate_on_prompt() {
     # Only run if we're not in the middle of a cd operation
-    if [ "$CD_ACTIVATING" != "1" ]; then
+    if [ "${CD_ACTIVATING:-0}" != "1" ]; then
         local current_dir="$(pwd)"
         
         # Activate virtual environment if available in current directory
@@ -87,7 +87,7 @@ activate_on_prompt() {
 }
 
 # Set up PROMPT_COMMAND to run activation on every prompt
-if [ -z "$PROMPT_COMMAND" ]; then
+if [ -z "${PROMPT_COMMAND:-}" ]; then
     PROMPT_COMMAND="activate_on_prompt"
 else
     PROMPT_COMMAND="$PROMPT_COMMAND; activate_on_prompt"

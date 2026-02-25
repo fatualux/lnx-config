@@ -140,6 +140,11 @@ log_warn() {
     fi
 }
 
+# Alias for backward compatibility
+log_warning() {
+    log_warn "$@"
+}
+
 # Error log - error messages
 log_error() {
     if _should_log $LOG_LEVEL_ERROR; then
@@ -230,15 +235,6 @@ log_process_complete() {
 
 log_process_failed() {
     log_error "Failed: $*"
-}
-
-# Docker-specific loggers
-log_docker_running() {
-    log_success "Docker is running"
-}
-
-log_docker_not_running() {
-    log_warn "Docker is not running"
 }
 
 log_docker_starting() {

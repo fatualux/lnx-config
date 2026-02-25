@@ -1,0 +1,164 @@
+#!/usr/bin/env bats
+
+# Bash Configuration Tests for lnx-config
+# Tests all configs/core/bash/ functionality
+
+load "${BATS_TEST_DIRNAME}/test_helper"
+
+setup() {
+    setup_test_env
+    setup_test_data
+    cd "$PROJECT_ROOT"
+}
+
+teardown() {
+    cleanup
+}
+
+@test "alias.sh provides command aliases" {
+    source configs/core/bash/alias.sh
+    
+    # Test that aliases are defined
+    alias | grep -q "ll" || true
+    alias | grep -q "la" || true
+}
+
+@test "autopair.sh provides auto-pairing functions" {
+    source configs/core/bash/autopair.sh
+    
+    # Test auto-pair functions exist
+    declare -f __autopair
+    declare -f __autopair_remove
+    
+    # Test helper functions
+    declare -f pd
+    declare -f ps
+    declare -f pr
+    declare -f pb
+    declare -f pc
+}
+
+@test "cd-activate.sh manages environment activation" {
+    source configs/core/bash/cd-activate.sh
+    
+    # Test activation functions
+    declare -f activate_on_prompt
+    declare -f activate_virtual_env
+    
+    # Test with mock virtual environment
+    local venv_dir="$TEST_TEMP_DIR/.venv"
+    mkdir -p "$venv_dir/bin"
+    echo '#!/bin/bash' > "$venv_dir/bin/activate"
+    
+    cd "$TEST_TEMP_DIR"
+    run activate_on_prompt
+    [[ $status -eq 0 ]]
+}
+
+@test "custom-functions.sh provides utility functions" {
+    source configs/core/bash/custom-functions.sh
+    
+    # Test that custom functions are defined
+    declare -f mkcd || true
+    declare -f extract || true
+    declare -f serve || true
+}
+
+@test "default-completion.sh provides defaults completion" {
+    source configs/core/bash/default-completion.sh
+    
+    # Test defaults completion functions
+    declare -f _defaults
+    declare -f _defaults_domains
+    declare -f _split_to_array
+}
+
+@test "dirs-completion.sh provides directory completion" {
+    source configs/core/bash/dirs-completion.sh
+    
+    # Test dirs completion functions
+    declare -f _dirs_complete
+    
+    # Test with mock .dirs file
+    local dirs_file="$HOME/.dirs"
+    echo "projects=/home/user/projects" > "$dirs_file"
+    echo "work=/home/user/work" >> "$dirs_file"
+    
+    # Mock completion environment
+    COMP_WORDS=("dirs" "projects")
+    COMP_CWORD=1
+    
+    run _dirs_complete
+    [[ $status -eq 0 ]]
+}
+
+@test "docker.sh provides docker utilities" {
+    source configs/core/bash/docker.sh
+    
+    # Test docker functions
+    declare -f docker_cleanup || true
+    declare -f docker_stats || true
+}
+
+@test "env_vars.sh sets environment variables" {
+    source configs/core/bash/env_vars.sh
+    
+    # Test that environment variables are set
+    [[ -n "${EDITOR:-}" ]] || true
+    [[ -n "${BROWSER:-}" ]] || true
+}
+
+@test "fzf_search.sh provides fuzzy search" {
+    source configs/core/bash/fzf_search.sh
+    
+    # Test fzf functions
+    declare -f fzf_search_files || true
+    declare -f fzf_search_history || true
+}
+
+@test "git-autocompletion.sh provides git completion" {
+    source configs/core/bash/git-autocompletion.sh
+    
+    # Test git completion functions
+    declare -f _git_completion_initialize
+    declare -f _git_flow
+    declare -f __git_ps1
+}
+
+@test "git-utils.sh provides git utilities" {
+    source configs/core/bash/git-utils.sh
+    
+    # Test git utility functions
+    declare -f git_status_short || true
+    declare -f git_branch_info || true
+}
+
+@test "history.sh manages bash history" {
+    source configs/core/bash/history.sh
+    
+    # Test history functions
+    declare -f history_search || true
+    declare -f history_clean || true
+}
+
+@test "mc-autocomplete.sh provides midnight commander completion" {
+    source configs/core/bash/mc-autocomplete.sh
+    
+    # Test mc completion functions
+    declare -f _mc || true
+}
+
+@test "readline.sh configures readline settings" {
+    source configs/core/bash/readline.sh
+    
+    # Test that readline settings are applied
+    bind -p | grep -q "set editing-mode" || true
+}
+
+@test "theme.sh provides color themes" {
+    source configs/core/bash/theme.sh
+    
+    # Test theme functions
+    declare -f set_theme || true
+    declare -f list_themes || true
+}

@@ -52,19 +52,10 @@ docker_manager() {
     log_error "Docker is not installed"
     return 1
   fi
-
-  log_debug "Docker command found"
-  if is_docker_running; then
-    log_docker_running
-  else
-    log_docker_not_running
-    start_docker
-  fi
 }
 
 # Only initialize Docker manager if not already running and command exists
 if command -v docker &>/dev/null && [[ -z "$DOCKER_MANAGER_INITIALIZED" ]]; then
-    log_info "Initializing Docker manager"
     docker_manager
     export DOCKER_MANAGER_INITIALIZED=1
 fi

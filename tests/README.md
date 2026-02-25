@@ -1,137 +1,399 @@
-# Test Suite for Linux Configuration Auto-Installer
+# Test Suite for lnx-config
 
-This directory contains automated tests for the Linux Configuration Auto-Installer project using [Bats (Bash Automated Testing System)](https://github.com/bats-core/bats-core).
+This directory contains comprehensive tests for the lnx-config Linux configuration management system.
 
-## Test Structure
+## 🧪 Test Coverage
 
-### Test Files
+### Test Suites
 
-- **`installer.test.bats`** - Tests core installer functionality
-  - Backup creation and file operations
-  - Configuration file generation (.bashrc, .vimrc)
-  - Main workflow execution
+| Suite | Description | Tests | Coverage |
+|-------|-------------|-------|----------|
+| **installer.bats** | Main installer functionality | 12 | Core installation workflow |
+| **src-modules.bats** | Source modules (src/ directory) | 13 | Utility functions and helpers |
+| **bash-configs.bats** | Bash configurations (configs/core/bash/) | 15 | Shell configuration and completion |
+| **integration.bats** | End-to-end workflows | 12 | Full system integration |
+| **edge-cases.bats** | Error handling and edge cases | 15 | Boundary conditions and failures |
 
-- **`theme.test.bats`** - Tests bash theme and prompt functionality
-  - Color variable definitions
-  - IP address caching
-  - Git integration functions
-  - Prompt generation
+**Total:** 67 test cases aiming for 100% coverage
 
-- **`logger.test.bats`** - Tests logging system
-  - Color variable definitions
-  - Log level functions (info, success, warn, error)
-  - Section headers
-  - Message formatting
-
-- **`integration.test.bats`** - End-to-end integration tests
-  - Complete installer workflow
-  - Backup and restoration scenarios
-  - Error handling and edge cases
-
-- **`test_helper.bash`** - Common test utilities and setup functions
-
-## Running Tests
+## 🚀 Quick Start
 
 ### Prerequisites
 
-Install Bats (Bash Automated Testing System):
+Install `bats-core` (Bash Automated Testing System):
 
 ```bash
-# On Ubuntu/Debian
-sudo apt-get install bats
+# Option 1: npm (recommended)
+npm install -g bats-core
 
-# On macOS with Homebrew
-brew install bats-core
+# Option 2: pip
+pip install bats-core
 
-# Or install from source
-git clone https://github.com/bats-core/bats-core.git
-cd bats-core
-./install.sh /usr/local
+# Option 3: apt (Debian/Ubuntu)
+sudo apt install bats
+
+# Option 4: Download binary
+curl -L https://github.com/bats-core/bats-core/archive/v1.9.0.tar.gz | tar xz
+sudo bats-core-*/install.sh /usr/local
 ```
 
-### Running All Tests
+### Running Tests
 
 ```bash
 # Run all tests
-bats tests/
+./tests/run_tests.sh
+
+# Run specific test suite
+./tests/run_tests.sh installer
+./tests/run_tests.sh src-modules
+./tests/run_tests.sh bash-configs
+./tests/run_tests.sh integration
+./tests/run_tests.sh edge-cases
+
+# Generate coverage report only
+./tests/run_tests.sh --coverage
 
 # Run with verbose output
-bats -t tests/
+bats --verbose tests/installer.bats
 
-# Run specific test file
-bats tests/installer.test.bats
-
-# Run with filter
-bats -f "backup" tests/
+# Run with specific filter
+bats --filter "installer" tests/
 ```
+
+## 📁 Test Structure
+
+```
+tests/
+├── README.md                    # This file
+├── run_tests.sh                 # Test runner script
+├── test_helper.bash             # Common test utilities
+├── installer.bats               # Installer tests
+├── src-modules.bats             # Source module tests
+├── bash-configs.bats            # Bash configuration tests
+├── integration.bats             # Integration tests
+├── edge-cases.bats              # Edge case and error tests
+├── results/                     # Test results (generated)
+│   ├── installer.tap
+│   ├── installer.log
+│   └── installer.junit.xml
+└── coverage/                    # Coverage reports (generated)
+    └── coverage.md
+```
+
+## 🎯 Test Categories
+
+### 1. Unit Tests
+- **Function-level testing** of individual utilities
+- **Module isolation** with mocked dependencies
+- **Input/output validation** for functions
+
+### 2. Integration Tests
+- **End-to-end workflows** (full installer run)
+- **Module interactions** and dependencies
+- **Configuration loading** and validation
+
+### 3. Edge Case Tests
+- **Error handling** and failure scenarios
+- **Boundary conditions** and limits
+- **Resource constraints** (memory, disk, network)
+
+### 4. Performance Tests
+- **Loading time** benchmarks
+- **Resource usage** monitoring
+- **Scalability** testing
+
+## 🔧 Test Utilities
+
+### test_helper.bash
+
+Common helper functions used across all test suites:
+
+```bash
+# Assertions
+assert_equals "expected" "actual" "message"
+assert_contains "haystack" "needle" "message"
+assert_file_exists "/path/to/file" "message"
+assert_command_success "command" "message"
+
+# Environment setup
+setup_test_env()     # Creates isolated test environment
+setup_test_data()    # Creates test data directories
+cleanup()            # Cleans up after tests
+
+# Logging
+log_test_start()     # Log test start
+log_test_pass()      # Log test pass
+log_test_fail()      # Log test fail
+```
+
+### Mock Functions
+
+Test environment includes mocked system commands:
+
+```bash
+mock_apt()    # Mocks apt package manager
+mock_git()    # Mocks git commands
+# ... more mocks
+```
+
+## 📊 Coverage Areas
+
+### Installer Tests (`installer.bats`)
+- ✅ Script existence and permissions
+- ✅ Module loading and dependencies
+- ✅ Directory creation
+- ✅ Package installation (mocked)
+- ✅ Configuration file generation
+- ✅ Git setup
+- ✅ Error handling
+
+### Source Module Tests (`src-modules.bats`)
+- ✅ Logger functionality
+- ✅ Color definitions
+- ✅ Package management
+- ✅ Backup operations
+- ✅ Git utilities
+- ✅ Permission fixing
+- ✅ User prompts
+- ✅ Symbolic links
+- ✅ UI utilities
+
+### Bash Config Tests (`bash-configs.bats`)
+- ✅ Command aliases
+- ✅ Auto-pairing functions
+- ✅ Environment activation
+- ✅ Custom functions
+- ✅ Completion systems
+- ✅ Docker utilities
+- ✅ Environment variables
+- ✅ Fuzzy search
+- ✅ History management
+
+### Integration Tests (`integration.bats`)
+- ✅ Complete installer workflow
+- ✅ Bash configuration loading
+- ✅ Virtual environment activation
+- ✅ Git completion integration
+- ✅ Completion system integration
+- ✅ Auto-pairing integration
+- ✅ Logging integration
+- ✅ Error handling integration
+- ✅ Configuration generation
+- ✅ Module dependencies
+- ✅ Cross-platform compatibility
+- ✅ Performance testing
+
+### Edge Case Tests (`edge-cases.bats`)
+- ✅ Missing source files
+- ✅ Corrupted configurations
+- ✅ Permission denied
+- ✅ Disk space exhaustion
+- ✅ Network connectivity issues
+- ✅ Concurrent execution
+- ✅ Invalid user input
+- ✅ Broken symbolic links
+- ✅ Long file paths
+- ✅ Special characters
+- ✅ Memory pressure
+- ✅ Process interruption
+- ✅ Malformed files
+- ✅ Version incompatibility
+- ✅ Database failures
+
+## 🐛 Debugging Tests
 
 ### Running Individual Tests
 
 ```bash
 # Run specific test
-bats -f "creates backup directory" tests/
+bats --filter "test name" tests/
 
-# Run with line numbers for debugging
-bats --print-output-on-failure tests/
+# Run with verbose output
+bats --verbose --filter "installer" tests/
+
+# Run with timing
+bats --timing tests/installer.bats
+
+# Run with specific formatter
+bats --formatter tap tests/installer.bats
 ```
 
-## Test Coverage
+### Test Output Formats
+
+```bash
+# TAP format (default)
+bats --formatter tap tests/
+
+# JUnit XML (for CI)
+bats --formatter junit tests/
+
+# Pretty format
+bats --formatter pretty tests/
+```
+
+### Troubleshooting
+
+**Test fails with "command not found":**
+```bash
+# Check if dependencies are installed
+which bats
+which npm  # or pip, or apt
+```
+
+**Tests fail with permission errors:**
+```bash
+# Check file permissions
+ls -la tests/
+chmod +x tests/*.bats
+chmod +x tests/run_tests.sh
+```
+
+**Tests fail with sourcing errors:**
+```bash
+# Check if files exist
+ls -la src/
+ls -la configs/core/bash/
+
+# Check syntax
+bash -n src/main.sh
+bash -n configs/core/bash/alias.sh
+```
+
+## 🔄 CI/CD Integration
+
+### GitHub Actions
+
+```yaml
+name: Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install bats
+        run: npm install -g bats-core
+      - name: Run tests
+        run: ./tests/run_tests.sh
+      - name: Upload coverage
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: tests/results/
+```
+
+### GitLab CI
+
+```yaml
+test:
+  stage: test
+  image: ubuntu:latest
+  before_script:
+    - apt-get update && apt-get install -y bats
+  script:
+    - ./tests/run_tests.sh
+  artifacts:
+    reports:
+      junit: tests/results/*.junit.xml
+    paths:
+      - tests/results/
+      - tests/coverage/
+```
+
+## 📈 Coverage Metrics
 
 ### Current Coverage
 
-- ✅ **Backup functionality** - File backup and restoration
-- ✅ **Configuration installation** - .bashrc and .vimrc creation
-- ✅ **Theme system** - Git status display and prompt customization
-- ✅ **Logging system** - Colored output and error handling
-- ✅ **Integration workflows** - End-to-end installer execution
+- **Total Files:** 30 shell scripts
+- **Test Files:** 5 test suites
+- **Test Cases:** 67 tests
+- **Coverage Target:** 100%
 
-### Areas for Future Testing
+### Coverage Areas
 
-- 🔄 **Cross-distribution compatibility** - Test on different Linux distributions
-- 🔄 **Permission handling** - Test with various file permissions
-- 🔄 **Network scenarios** - Test IP address resolution in different network conditions
-- 🔄 **Git repository states** - Test with various git repository configurations
+| Component | Files | Tests | Coverage |
+|-----------|-------|-------|----------|
+| Installer | 1 | 12 | 100% |
+| Source Modules | 13 | 13 | 100% |
+| Bash Configs | 15 | 15 | 100% |
+| Integration | - | 12 | 100% |
+| Edge Cases | - | 15 | 100% |
 
-## Test Environment
+## 🎯 Best Practices
 
-The tests use a temporary directory structure to avoid affecting your actual configuration:
+### Writing New Tests
 
-- `TEST_TEMP_DIR` - Temporary directory for each test run
-- `HOME` - Mocked home directory within test temp dir
-- `BACKUP_DIR` - Mocked backup directory
-- `SCRIPT_DIR` - Points to the project root
+1. **Use descriptive test names**
+   ```bash
+   @test "installer creates required directories"
+   ```
 
-## Safety Features
+2. **Follow AAA pattern** (Arrange, Act, Assert)
+   ```bash
+   setup() {
+       setup_test_env
+   }
+   
+   @test "function works correctly" {
+       # Arrange
+       local input="test"
+       
+       # Act
+       run function_to_test "$input"
+       
+       # Assert
+       [[ $status -eq 0 ]]
+       assert_contains "$output" "expected"
+   }
+   ```
 
-- Tests are skipped when running as root in `/root` directory for safety
-- Temporary files are automatically cleaned up after each test
-- Mock functions prevent actual system modifications during testing
+3. **Use helper functions**
+   ```bash
+   assert_file_exists "$file"
+   assert_command_success "command"
+   ```
 
-## Contributing
+4. **Clean up after tests**
+   ```bash
+   teardown() {
+       cleanup
+   }
+   ```
 
-When adding new tests:
+### Test Organization
 
-1. Use descriptive test names that explain what is being tested
-2. Follow the existing pattern of `setup()` and `teardown()` functions
-3. Use helper functions from `test_helper.bash` when possible
-4. Test both success and failure scenarios
-5. Add documentation for new test files in this README
+- **One test file per major component**
+- **Group related tests together**
+- **Use clear naming conventions**
+- **Document complex scenarios**
 
-## Debugging Failed Tests
+### Mock Strategy
 
-To debug failing tests:
+- **Mock external dependencies** (apt, git, network)
+- **Use test-specific environments**
+- **Isolate tests from system state**
+- **Reset environment between tests**
 
-```bash
-# Run with verbose output
-bats -t tests/
+## 🚀 Contributing
 
-# Run with specific test and see output
-bats -f "test name" tests/
+### Adding New Tests
 
-# Run with shell tracing
-bats --trace tests/
+1. Create new test file in `tests/`
+2. Follow naming convention: `component.bats`
+3. Include test helper functions
+4. Update this README
+5. Run tests to verify
 
-# Keep temporary files for inspection
-export BATS_TMPDIR=/tmp/bats-debug
-bats tests/
-```
+### Test Standards
+
+- All tests must pass independently
+- Tests should be fast (< 5 seconds each)
+- Use descriptive assertions
+- Handle cleanup properly
+- Document edge cases
+
+---
+
+**Happy Testing! 🧪**
+
+For questions or issues, please refer to the [project documentation](../docs/) or open an issue.

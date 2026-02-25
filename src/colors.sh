@@ -26,6 +26,7 @@ readonly COLOR_BLUE='\033[0;34m'
 readonly COLOR_MAGENTA='\033[0;35m'
 readonly COLOR_CYAN='\033[0;36m'
 readonly COLOR_WHITE='\033[0;37m'
+readonly COLOR_PURPLE='\033[0;35m'  # Alias for MAGENTA
 
 # Bold Colors
 readonly COLOR_BOLD_BLACK='\033[1;30m'
@@ -99,6 +100,7 @@ readonly COLOR_STRIKETHROUGH='\033[9m'
 
 # Reset/No Color
 readonly NC='\033[0m'
+readonly RESET='\033[0m'  # Alias for NC
 
 # Aliases for common usage (backward compatibility)
 readonly RED='\033[0;31m'

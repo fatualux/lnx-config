@@ -2,6 +2,34 @@
 
 # Permissions management module
 
+# Function to fix script permissions in a directory
+fix_script_permissions() {
+    local directory="$1"
+    
+    if [[ ! -d "$directory" ]]; then
+        log_error "Directory not found: $directory"
+        return 1
+    fi
+    
+    log_info "Fixing script permissions in: $directory"
+    
+    # Find and make all .sh files executable
+    local scripts_found=0
+    while IFS= read -r -d '' script; do
+        if [[ -f "$script" && "$script" == *.sh ]]; then
+            chmod +x "$script"
+            ((scripts_found++))
+            log_info "Made executable: $script"
+        fi
+    done < <(find "$directory" -name "*.sh" -type f 2>/dev/null)
+    
+    if [[ $scripts_found -gt 0 ]]; then
+        log_success "Fixed permissions for $scripts_found script(s)"
+    else
+        log_info "No shell scripts found in $directory"
+    fi
+}
+
 # Function to set executable permissions
 set_executable() {
     local file="$1"

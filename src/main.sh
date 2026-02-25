@@ -76,7 +76,7 @@ run_installation() {
     # Execute installation steps in order
     clean_old_backups
     create_backup_dir
-    backup_files
+    # backup_files  # DISABLED - causing massive backup issues
     remove_existing_configs
     install_packages
     copy_custom_configs

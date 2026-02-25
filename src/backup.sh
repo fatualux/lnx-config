@@ -2,6 +2,9 @@
 
 # Backup management module
 
+# Set SCRIPT_DIR if not already set
+: "${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
+
 # Configuration
 BACKUP_DIR="$SCRIPT_DIR/backups/$(date '+%y-%m-%d_%H-%M-%S')"
 MAX_BACKUPS=5  # Keep only 5 most recent backups
@@ -34,7 +37,25 @@ clean_old_backups() {
 create_backup_dir() {
     log_info "Creating backup directory: $BACKUP_DIR"
     mkdir -p "$BACKUP_DIR"
-    log_success "Backup directory created: $BACKUP_DIR"
+}
+
+# Function to create backup
+create_backup() {
+    local source_dir="$1"
+    local backup_name="$2"
+    
+    if [[ ! -d "$source_dir" ]]; then
+        log_error "Source directory does not exist: $source_dir"
+        return 1
+    fi
+    
+    local target_dir="$BACKUP_DIR/$backup_name"
+    mkdir -p "$target_dir"
+    
+    log_info "Backing up: $source_dir -> $target_dir"
+    cp -r "$source_dir" "$target_dir"
+    
+    log_success "Backup created: $backup_name"
 }
 
 # Function to backup existing files

@@ -2,7 +2,10 @@
 
 # Show where the matching open paren is when inserting a closing one. Disabling
 # as it hijacks the `)`, `]` and `}` characters to enable blinking.
-bind "set blink-matching-paren off"
+# Only bind if line editing is enabled
+if [[ -n "${BASH_VERSION:-}" ]] && [[ -t 0 ]]; then
+    bind "set blink-matching-paren off" 2>/dev/null || true
+fi
 
 function __autopair() {
   local typed_char="$1"
@@ -159,23 +162,33 @@ __pairs=(
   '{}'
 )
 
-for pair in "${__pairs[@]:0:3}"; do
-  bind -x "\"${pair:0:1}\": __autopair \\${pair:0:1} \\${pair:0:1} \\${pair:1:1}"
-done
-for pair in "${__pairs[@]:3}"; do
-  bind -x "\"${pair:0:1}\": __autopair \\${pair:0:1} \\${pair:0:1} \\${pair:1:1}"
-  bind -x "\"${pair:1:1}\": __autopair \\${pair:1:1} \\${pair:0:1} \\${pair:1:1}"
-done
-bind -x "\"\\\"\": __autopair \\\" \\\" \\\"" # `"` needs to be done separately
-unset pair
+# Only set up bindings if line editing is available
+if [[ -n "${BASH_VERSION:-}" ]] && [[ -t 0 ]]; then
+  for pair in "${__pairs[@]:0:3}"; do
+    bind -x "\"${pair:0:1}\": __autopair \\${pair:0:1} \\${pair:0:1} \\${pair:1:1}" 2>/dev/null || true
+  done
+  for pair in "${__pairs[@]:3}"; do
+    bind -x "\"${pair:0:1}\": __autopair \\${pair:0:1} \\${pair:0:1} \\${pair:1:1}" 2>/dev/null || true
+    bind -x "\"${pair:1:1}\": __autopair \\${pair:1:1} \\${pair:0:1} \\${pair:1:1}" 2>/dev/null || true
+  done
+  bind -x "\"\\\"\": __autopair \\\" \\\" \\\"" 2>/dev/null || true # `"` needs to be done separately
+  unset pair
 
-bind -x '"\C-h": __autopair_remove'
+  bind -x '"\C-h": __autopair_remove' 2>/dev/null || true
 
-if [[ "$(bind -q magic-space)" =~ 'invoked via " "' ]]; then
-  bind -x "\" \": __autopair_space 1"
-else
-  bind -x "\" \": __autopair_space 0"
+  if [[ "$(bind -q magic-space)" =~ 'invoked via " "' ]]; then
+    bind -x "\" \": __autopair_space 1" 2>/dev/null || true
+  else
+    bind -x "\" \": __autopair_space 0" 2>/dev/null || true
+  fi
 fi
+
+# Helper functions for manual pairing (fallback when readline not available)
+pd() { echo '""'; }
+ps() { echo "''"; }
+pr() { echo "()"; }
+pb() { echo "[]"; }
+pc() { echo "{}"; }
 
 if [[ -v BASH_AUTOPAIR_BACKSPACE ]]; then
   # https://lists.gnu.org/archive/html/bug-bash/2019-11/msg00129.html
