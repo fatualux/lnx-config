@@ -89,7 +89,7 @@ bind_autopair() {
         
         # Bind control sequences to these functions
         bind -x '"\C-x\"": insert_double_quotes' 2>/dev/null
-        bind -x '"\C-x\'": insert_single_quotes' 2>/dev/null
+        bind -x "\"\C-x'\": insert_single_quotes" 2>/dev/null
         bind -x '"\C-x(": insert_parens' 2>/dev/null
         bind -x '"\C-x[": insert_brackets' 2>/dev/null
         bind -x '"\C-x{": insert_braces' 2>/dev/null
