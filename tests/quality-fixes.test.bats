@@ -14,7 +14,7 @@ load test_helper
     cp installer.sh "$temp_installer"
     
     # Modify to use non-existent backup directory
-    sed -i 's|SCRIPT_DIR/backups|/tmp/non_existent_backups|' "$temp_installer"
+    sed -i '$SCRIPT_DIR/backups|/tmp/non_existent_backups|g' "$temp_installer"
     
     # Should not fail when backup directory doesn't exist
     run bash -c "source $temp_installer && clean_old_backups"
