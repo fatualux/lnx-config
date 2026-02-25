@@ -1,4 +1,3 @@
-joshuto
 aptitude
 bash-completion
 black
