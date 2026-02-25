@@ -1,5 +1,4 @@
 -- Statusline and ruler configuration
--- Location: ~/.lnx-config/configs/nvim/config/statusline.lua
 
 local opt = vim.opt
 

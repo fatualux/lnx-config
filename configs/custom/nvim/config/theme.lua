@@ -1,5 +1,4 @@
 -- Theme and color scheme configuration
--- Location: ~/.lnx-config/configs/nvim/config/theme.lua
 
 local fn = vim.fn
 local opt = vim.opt

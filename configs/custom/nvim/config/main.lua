@@ -1,5 +1,4 @@
 -- Main configuration loader for Neovim
--- Location: ~/.lnx-config/configs/nvim/config/main.lua
 -- This file is sourced from init.lua to load all configuration modules
 
 -- Add config directory to package path for requires

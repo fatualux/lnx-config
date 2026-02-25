@@ -1,7 +1,6 @@
 #!/bin/bash
 # Main configuration loader for Vim
 # This file is sourced via ~/.vimrc to load all vim configurations
-# Location: ~/.lnx-config/configs/vim/config/main.sh (sourced via Vim's execute command)
 
 # This is a bash script that Vim can execute to apply configurations
 # Vim itself handles the sourcing of .vim files via the vimrc

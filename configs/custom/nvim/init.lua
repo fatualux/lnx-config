@@ -1,6 +1,4 @@
--- Neovim configuration for lnx-config
 -- Main entry point - loads all configuration modules
--- Location: ~/.lnx-config/configs/nvim/init.lua
 
 -- Set up the package path to find local config modules
 local init_file = debug.getinfo(1).source:sub(2)

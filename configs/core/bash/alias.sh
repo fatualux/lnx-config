@@ -10,7 +10,6 @@ alias c="clear"
 alias co="checkout"
 
 # Custom Function Aliases
-alias lma="list_my_aliases"
 alias cc="code_directory"
 alias rcd="recursive_cat"
 alias mm="play_music_shuffle"

@@ -1,5 +1,4 @@
 -- General utility functions
--- Location: ~/.lnx-config/configs/nvim/config/utils.lua
 
 local fn = vim.fn
 local api = vim.api
