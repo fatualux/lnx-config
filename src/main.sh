@@ -14,7 +14,7 @@ show_welcome() {
 |______\__,_|\__|_| |_|\__,_|\___|_|\_\___|_|   
                                                    
 EOF
-    echo -e "${COLOR_RESET}"
+    echo -e "${NC}"
     echo -e "${COLOR_CYAN}Linux Configuration Auto-Installer v$VERSION${NC}"
     echo -e "${COLOR_CYAN}======================================${NC}"
     echo ""
