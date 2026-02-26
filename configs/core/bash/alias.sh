@@ -1,4 +1,5 @@
 #!/bin/bash
+
 alias ls='ls -a --color=auto'
 alias j="joshuto"
 alias python="python3"

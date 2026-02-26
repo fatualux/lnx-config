@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 code_directory() {
 	local chosen_dir
 	log_debug "Searching for directories with fzf"

@@ -95,6 +95,12 @@ while [[ $# -gt 0 ]]; do
 	-y | --yes)
 		auto_yes=true
 		;;
+	--dev-mode)
+		dev_mode=true
+		;;
+	--force)
+		force_regeneration=true
+		;;
 	--name)
 		shift
 		user_name="$1"
@@ -123,6 +129,8 @@ export dry_run
 export auto_yes
 export user_name
 export user_email
+export dev_mode
+export force_regeneration=false
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 	main
@@ -141,6 +149,8 @@ OPTIONS:
 	-v, --version       Show version information
 	-d, --dry-run      Show what would be done without making changes
 	-y, --yes          Answer yes to all prompts
+	--dev-mode          Enable development mode (creates .bashrc.dev)
+	--force)          Force regeneration of configuration files
 	--name NAME         Set user name for git configuration
 	--email EMAIL       Set user email for git configuration
 	
@@ -148,6 +158,7 @@ EXAMPLES:
 	installer.sh                           # Run interactive installation
 	installer.sh --dry-run                 # Preview installation steps
 	installer.sh --yes                     # Run non-interactive installation
+	installer.sh --dev-mode                # Run in development mode
 	installer.sh --name "John Doe" --email "john@example.com"  # Set git config
 EOF
 }
@@ -161,11 +172,21 @@ main() {
 	echo "LNX-CONFIG Linux Configuration Auto-Installer v$VERSION"
 	echo ""
 	
-	# Main installation logic would go here
-	if [[ "$dry_run" == "true" ]]; then
-		echo "DRY RUN: Would install configuration files..."
+	# Handle development mode
+	if [[ "$dev_mode" == "true" ]]; then
+		echo "DEVELOPMENT MODE: Creating sourcing-based configuration..."
+		create_dev_bashrc
+		echo ""
+		echo "Development mode activated!"
+		echo "Run: source ~/.bashrc.dev"
+		echo "To switch back to production mode, run installer without --dev-mode"
 	else
-		echo "Starting installation..."
+		# Main installation logic would go here
+		if [[ "$dry_run" == "true" ]]; then
+			echo "DRY RUN: Would install configuration files..."
+		else
+			echo "Starting installation..."
+		fi
 	fi
 }
 

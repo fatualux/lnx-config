@@ -5,6 +5,14 @@
 # Set SCRIPT_DIR if not already set
 : "${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 
+# Set VERSION if not already set
+: "${VERSION:=2.6.7}"
+
+# Source logger for logging functions
+if [[ -f "$SCRIPT_DIR/logger.sh" ]]; then
+    source "$SCRIPT_DIR/logger.sh"
+fi
+
 # Function to create required directories
 create_directories() {
     log_section "Creating required directories"
@@ -63,14 +71,158 @@ copy_custom_configs() {
     fi
 }
 
+# Function to create metadata header
+create_metadata_header() {
+    local config_type="$1"  # "bashrc" or "vimrc"
+    local module_count="$2"
+    local timestamp
+    timestamp=$(date -Iseconds)
+    
+    cat << EOF
+# ========================================
+# Auto-generated $config_type configuration
+# Generated: $timestamp
+# Total modules: $module_count
+# Generator: LNX-CONFIG v$VERSION
+# ========================================
+
+EOF
+}
+
+# Function to validate bash syntax
+validate_bash_syntax() {
+    local bash_file="$1"
+    log_debug "Validating bash syntax: $bash_file"
+    
+    if bash -n "$bash_file" 2>/dev/null; then
+        log_success "Bash syntax validation passed: $bash_file"
+        return 0
+    else
+        log_error "Bash syntax validation failed: $bash_file"
+        bash -n "$bash_file" 2>&1 | head -20 | while read -r line; do
+            log_error "Syntax error: $line"
+        done
+        return 1
+    fi
+}
+
+# Function to validate vim syntax
+validate_vim_syntax() {
+    local vim_file="$1"
+    log_debug "Validating vim syntax: $vim_file"
+    
+    if vim -c "syntax check" "$vim_file" -c "quitall" 2>/dev/null; then
+        log_success "Vim syntax validation passed: $vim_file"
+        return 0
+    else
+        log_error "Vim syntax validation failed: $vim_file"
+        vim -c "syntax check" "$vim_file" -c "quitall" 2>&1 | head -10 | while read -r line; do
+            log_error "Syntax error: $line"
+        done
+        return 1
+    fi
+}
+
+# Function to rollback configuration file
+rollback_config() {
+    local config_file="$1"
+    local backup_file="${config_file}.backup"
+    
+    if [[ -f "$backup_file" ]]; then
+        log_warn "Rolling back to backup: $backup_file"
+        cp "$backup_file" "$config_file"
+        log_success "Rollback completed: $config_file"
+        return 0
+    else
+        log_error "No backup file found for rollback: $backup_file"
+        return 1
+    fi
+}
+
+# Function to get latest source file modification time
+get_latest_source_time() {
+    local latest_time=0
+    
+    # Check source directories
+    for dir in "$SRC_DIR" "$CORE_BASH_DIR" "$CORE_VIM_DIR"; do
+        if [[ -d "$dir" ]]; then
+            local dir_time=$(find "$dir" -name "*.sh" -o -name "*.vim" -type f -printf "%T@\n" 2>/dev/null | sort -r | head -1)
+            if [[ -n "$dir_time" && "$dir_time" > "$latest_time" ]]; then
+                latest_time="$dir_time"
+            fi
+        fi
+    done
+    
+    echo "$latest_time"
+}
+
+# Function to get generated file modification time
+get_generated_time() {
+    local config_file="$1"
+    
+    if [[ -f "$config_file" ]]; then
+        stat -c %Y "$config_file" 2>/dev/null || echo "0"
+    else
+        echo "0"
+    fi
+}
+
+# Function to determine if regeneration is needed
+should_regenerate() {
+    local config_file="$1"
+    local force_flag="$2"
+    
+    # Always regenerate if force flag is set
+    if [[ "$force_flag" == "true" ]]; then
+        log_info "Force regeneration requested"
+        return 0  # true = should regenerate
+    fi
+    
+    # Check if generated file exists
+    if [[ ! -f "$config_file" ]]; then
+        log_info "Generated file does not exist, regenerating"
+        return 0  # true = should regenerate
+    fi
+    
+    # Compare modification times
+    local source_time
+    local generated_time
+    source_time=$(get_latest_source_time)
+    generated_time=$(get_generated_time "$config_file")
+    
+    if [[ "$source_time" -gt "$generated_time" ]]; then
+        log_info "Source files are newer, regenerating"
+        return 0  # true = should regenerate
+    else
+        log_info "Generated file is up-to-date, skipping regeneration"
+        return 1  # false = should not regenerate
+    fi
+}
+
 # Function to create .vimrc
 create_vimrc() {
     log_section "Creating .vimrc"
     
     local vimrc_file="$HOME/.vimrc"
+    local module_count=0
     
-    # Start with empty .vimrc
-    > "$vimrc_file"
+    # Check if regeneration is needed
+    if ! should_regenerate "$vimrc_file" "$force_regeneration"; then
+        log_info "Skipping .vimrc regeneration (up-to-date)"
+        return 0
+    fi
+    
+    # Count modules before processing
+    if [[ -d "$CORE_VIM_DIR/config" ]]; then
+        module_count=$(find "$CORE_VIM_DIR/config" -name "*.vim" -type f | wc -l)
+    fi
+    
+    # Start with metadata header
+    {
+        create_metadata_header "vimrc" "$module_count"
+        echo "# Vim Configuration Modules"
+        echo ""
+    } > "$vimrc_file"
     
     # Append content from core/vim/config if exists
     if [[ -d "$CORE_VIM_DIR/config" ]]; then
@@ -80,7 +232,9 @@ create_vimrc() {
         local vim_files=("$CORE_VIM_DIR/config"/*.vim)
         for vim_file in "${vim_files[@]}"; do
             if [[ -f "$vim_file" ]]; then
+                local file_origin="${vim_file#$SCRIPT_DIR/}"
                 log_info "Appending: $(basename "$vim_file")"
+                echo "# Source: $file_origin" >> "$vimrc_file"
                 cat "$vim_file" >> "$vimrc_file"
                 echo "" >> "$vimrc_file"  # Add newline between files
             fi
@@ -91,6 +245,17 @@ create_vimrc() {
         log_warn "Core vim config directory not found: $CORE_VIM_DIR/config"
         log_info "Created empty .vimrc"
     fi
+    
+    # Validate the generated vimrc
+    if ! validate_vim_syntax "$vimrc_file"; then
+        log_error "Generated .vimrc failed validation, rolling back..."
+        rollback_config "$vimrc_file"
+        return 1
+    fi
+    
+    # Create backup of generated file
+    cp "$vimrc_file" "${vimrc_file}.backup"
+    log_success "Backup created: ${vimrc_file}.backup"
 }
 
 # Function to create .bashrc
@@ -98,14 +263,34 @@ create_bashrc() {
     log_section "Creating .bashrc"
     
     local bashrc_file="$HOME/.bashrc"
+    local module_count=0
     
-    # Start with empty .bashrc
-    > "$bashrc_file"
+    # Check if regeneration is needed
+    if ! should_regenerate "$bashrc_file" "$force_regeneration"; then
+        log_info "Skipping .bashrc regeneration (up-to-date)"
+        return 0
+    fi
     
-    # Add script directory variable first
-    echo "# Script directory for theme loading" >> "$bashrc_file"
-    echo "SCRIPT_DIR=\"$SCRIPT_DIR\"" >> "$bashrc_file"
-    echo "" >> "$bashrc_file"
+    # Count modules before processing
+    local src_modules=0
+    local core_modules=0
+    if [[ -d "$SRC_DIR" ]]; then
+        src_modules=$(find "$SRC_DIR" -name "*.sh" -type f | wc -l)
+    fi
+    if [[ -d "$CORE_BASH_DIR" ]]; then
+        core_modules=$(find "$CORE_BASH_DIR" -name "*.sh" -type f | wc -l)
+    fi
+    module_count=$((src_modules + core_modules))
+    
+    # Start with metadata header
+    {
+        create_metadata_header "bashrc" "$module_count"
+        echo "# Bash Configuration Modules"
+        echo ""
+        echo "# Script directory for theme loading"
+        echo "SCRIPT_DIR=\"$SCRIPT_DIR\""
+        echo ""
+    } > "$bashrc_file"
     
     # Append colors.sh and logger.sh first
     if [[ -f "$SCRIPT_DIR/src/colors.sh" ]]; then
@@ -197,6 +382,59 @@ create_bashrc() {
     else
         log_warn "Core bash directory not found: $CORE_BASH_DIR"
     fi
+    
+    # Validate the generated bashrc
+    if ! validate_bash_syntax "$bashrc_file"; then
+        log_error "Generated .bashrc failed validation, rolling back..."
+        rollback_config "$bashrc_file"
+        return 1
+    fi
+    
+    # Create backup of generated file
+    cp "$bashrc_file" "${bashrc_file}.backup"
+    log_success "Backup created: ${bashrc_file}.backup"
+}
+
+# Function to create development mode .bashrc.dev
+create_dev_bashrc() {
+    log_section "Creating .bashrc.dev (development mode)"
+    
+    local bashrc_dev_file="$HOME/.bashrc.dev"
+    
+    # Start with development mode header
+    {
+        echo "# ========================================"
+        echo "# Development Mode .bashrc.dev"
+        echo "# Generated: $(date -Iseconds)"
+        echo "# Mode: DEVELOPMENT (sourcing-based)"
+        echo "# Generator: LNX-CONFIG v$VERSION"
+        echo "# ========================================"
+        echo ""
+        echo "# Development mode sources modules directly for easier development"
+        echo "# Use 'source ~/.bashrc.dev' to activate development mode"
+        echo ""
+        echo "# Script directory for theme loading"
+        echo "SCRIPT_DIR=\"$SCRIPT_DIR\""
+        echo ""
+        echo "# Source colors and logger first"
+        echo "if [[ -f \"$SCRIPT_DIR/src/colors.sh\" ]]; then"
+        echo "    source \"$SCRIPT_DIR/src/colors.sh\""
+        echo "fi"
+        echo ""
+        echo "if [[ -f \"$SCRIPT_DIR/src/logger.sh\" ]]; then"
+        echo "    source \"$SCRIPT_DIR/src/logger.sh\""
+        echo "fi"
+        echo ""
+        echo "# Source all bash modules from directories"
+        echo "for config_file in \"$SRC_DIR\"/*.sh \"$CORE_BASH_DIR\"/**/*.sh; do"
+        echo "    if [[ -f \"\$config_file\" ]]; then"
+        echo "        source \"\$config_file\""
+        echo "    fi"
+        echo "done"
+    } > "$bashrc_dev_file"
+    
+    log_success ".bashrc.dev created for development mode"
+    log_info "To activate: source ~/.bashrc.dev"
 }
 
 # Function to create .bash_profile
