@@ -22,12 +22,18 @@ load_module() {
 	local module="$1"
 	local module_path="$SRC_DIR/$module"
 	
-	# Check if module is already loaded
+	# Check if module is already loaded using optimized array lookup
+	local already_loaded=false
 	for loaded in "${__LOADED_MODULES[@]}"; do
 		if [[ "$loaded" == "$module" ]]; then
-			return 0
+			already_loaded=true
+			break
 		fi
 	done
+	
+	if [[ "$already_loaded" == true ]]; then
+		return 0
+	fi
 	
 	# Load the module
 	if [[ -f "$module_path" ]]; then

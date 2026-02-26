@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# Command existence cache to avoid repeated command lookups
+declare -A __COMMAND_CACHE=()
+
+# Cache command availability for O(1) lookup
+cache_command() {
+	local cmd="$1"
+	if [[ -z "${__COMMAND_CACHE[$cmd]:-}" ]]; then
+		__COMMAND_CACHE[$cmd]=$(command -v "$cmd" >/dev/null 2>&1 && echo "1" || echo "0")
+	fi
+	[[ "${__COMMAND_CACHE[$cmd]}" == "1" ]]
+}
+
 code_directory() {
 	local chosen_dir
 	log_debug "Searching for directories with fzf"
@@ -11,32 +23,6 @@ code_directory() {
 	else
 		log_warn "No directory selected"
 	fi
-}
-
-
-# recursively cats all files in a given directory with their names
-# if run with no arguments, it cats the current directory
-recursive_cat() {
-    local dir="${1:-.}"
-
-    # Check if directory exists
-    if [[ ! -d "$dir" ]]; then
-        echo "Directory does not exist: $dir" >&2
-        return 1
-    fi
-
-    # Loop through items in the directory
-    for item in "$dir"/*; do
-        if [[ -d "$item" ]]; then
-            # If item is a directory, recurse into it
-            recursive_cat "$item"
-        elif [[ -f "$item" ]]; then
-            # If item is a file, print its name and contents
-            echo "==> $item <=="
-            cat "$item"
-            echo ""
-        fi
-    done
 }
 
 
@@ -147,21 +133,28 @@ kill_docker_containers() {
 
 
 clear_python_caches() {
-	if command -v log_process_start >/dev/null 2>&1; then
+	# Cache command availability once
+	local has_log_process_start=false
+	local has_log_debug=false
+	
+	if cache_command "log_process_start"; then
+		has_log_process_start=true
 		log_process_start "Clearing Python caches"
 	fi
-	if command -v log_process_start >/dev/null 2>&1; then
-		log_process_start "Clearing Python caches"
-	fi
-	if command -v log_debug >/dev/null 2>&1; then
+	
+	if cache_command "log_debug"; then
+		has_log_debug=true
 		log_debug "Removing __pycache__, .mypy_cache, and .pytest_cache directories"
 	fi
+	
 	find . -type d \( -name "__pycache__" -o -name ".mypy_cache" -o -name ".pytest_cache" \) -exec rm -r {} +
-	if command -v log_debug >/dev/null 2>&1; then
+	
+	if [[ "$has_log_debug" == true ]]; then
 		log_debug "Removing *.pyc files"
 	fi
 	find . -name "*.pyc" -delete
-	if command -v log_process_complete >/dev/null 2>&1; then
+	
+	if [[ "$has_log_process_start" == true ]]; then
 		log_process_complete "Python caches cleared"
 	fi
 }
