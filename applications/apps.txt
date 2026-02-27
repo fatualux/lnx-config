@@ -1,9 +1,11 @@
-### Dev Tools ###
+gpg
 aptitude
 bash-completion
 black
 build-essential
 cmake
+curl
+docker-compose
 gcc
 git
 git-filter-repo
@@ -15,7 +17,11 @@ mpv
 mypy
 ncurses-base
 ncurses-bin
+nodejs
+npm
 ninja-build
+openssh-client
+pipx
 pkg-config
 python3
 python3-dev
@@ -23,28 +29,13 @@ python3-httpx
 python3-pip
 python3-requests
 python3-tk
-python3.11
-python3.11-venv
+python3-venv
 rustc
 shellcheck
-
-### Networking ###
-curl
-docker
-docker-compose-plugin
-openssh-client
-wget
-wl-clipboard
-
-### Other ###
-fzf
-nodejs
-npm
-pipx
-rustc
 ssh
 truststore
-
-### Editors ###
-neovim
 vim
+wget
+wl-clipboard
+fzf
+neovim

@@ -2,6 +2,15 @@
 
 start_docker() {
   log_docker_starting
+  
+  # Check if Docker daemon is available
+  if ! command -v dockerd &> /dev/null; then
+    log_info "Docker daemon (dockerd) not available, skipping Docker startup"
+    log_info "Docker client may still be available for container management"
+    log_info "To install Docker daemon, visit: https://docs.docker.com/engine/install/"
+    return 0  # Success - Docker may still be usable as client
+  fi
+  
   DOCKER_SOCK=/var/run/docker.sock
   MAX_WAIT=30
   INTERVAL=0.2

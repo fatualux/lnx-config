@@ -113,6 +113,14 @@ validate_vim_syntax() {
     local vim_file="$1"
     log_debug "Validating vim syntax: $vim_file"
     
+    # Check if vim command is available
+    if ! command -v vim &> /dev/null; then
+        log_info "Vim not available, skipping syntax validation: $vim_file"
+        log_info "Vimrc file will still be created for manual use"
+        return 0  # Success - .vimrc can still be created
+    fi
+    
+    # Vim is available, proceed with validation
     if vim -c "syntax check" "$vim_file" -c "quitall" 2>/dev/null; then
         log_success "Vim syntax validation passed: $vim_file"
         return 0
@@ -248,11 +256,15 @@ create_vimrc() {
         log_info "Created empty .vimrc"
     fi
     
-    # Validate the generated vimrc
-    if ! validate_vim_syntax "$vimrc_file"; then
-        log_error "Generated .vimrc failed validation, rolling back..."
-        rollback_config "$vimrc_file"
-        return 1
+    # Validate the generated vimrc (only if vim is available)
+    if command -v vim &> /dev/null; then
+        if ! validate_vim_syntax "$vimrc_file"; then
+            log_error "Generated .vimrc failed validation, rolling back..."
+            rollback_config "$vimrc_file"
+            return 1
+        fi
+    else
+        log_info "Vim not available - skipping .vimrc validation (file still created for manual use)"
     fi
     
     # Create backup of generated file

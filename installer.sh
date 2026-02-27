@@ -14,31 +14,23 @@ user_email=""
 export LOG_LEVEL=0
 export LOG_TIMESTAMP=true
 
-# Module loading cache to prevent re-sourcing
-__LOADED_MODULES=()
+# Module loading cache to prevent re-sourcing - using associative array for O(1) lookup
+declare -A __LOADED_MODULES
 
 # Function to load module with caching
 load_module() {
 	local module="$1"
 	local module_path="$SRC_DIR/$module"
 	
-	# Check if module is already loaded using optimized array lookup
-	local already_loaded=false
-	for loaded in "${__LOADED_MODULES[@]}"; do
-		if [[ "$loaded" == "$module" ]]; then
-			already_loaded=true
-			break
-		fi
-	done
-	
-	if [[ "$already_loaded" == true ]]; then
+	# Check if module is already loaded using O(1) associative array lookup
+	if [[ -n "${__LOADED_MODULES[$module]:-}" ]]; then
 		return 0
 	fi
 	
 	# Load the module
 	if [[ -f "$module_path" ]]; then
 		source "$module_path"
-		__LOADED_MODULES+=("$module")
+		__LOADED_MODULES["$module"]=1
 	else
 		echo "Error: Required module $module_path not found" >&2
 		exit 1

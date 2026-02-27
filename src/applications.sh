@@ -68,11 +68,47 @@ install_packages() {
         if [[ ${#packages_to_install[@]} -gt 0 ]]; then
             log_info "Installing ${#packages_to_install[@]} apt packages: ${packages_to_install[*]}"
             
-            if apt install -y "${packages_to_install[@]}"; then
-                log_success "All apt packages installed successfully"
+            local failed_packages=()
+            local successful_packages=()
+            
+            # Install packages individually to handle failures gracefully
+            for package in "${packages_to_install[@]}"; do
+                log_info "Installing package: $package"
+                if apt install -y "$package"; then
+                    successful_packages+=("$package")
+                    log_success "Successfully installed: $package"
+                else
+                    failed_packages+=("$package")
+                    log_error "Failed to install: $package"
+                    
+                    # Provide alternative suggestions for known problematic packages
+                    case "$package" in
+                        "docker")
+                            log_info "Alternative: Try 'wmdocker' or install Docker from official repository"
+                            ;;
+                        "docker-compose-plugin")
+                            log_info "Alternative: Try 'docker-compose' or install Docker Compose separately"
+                            ;;
+                        "python3.11")
+                            log_info "Alternative: Use 'python3' and 'python3-venv' for version-agnostic setup"
+                            ;;
+                        "python3.11-venv")
+                            log_info "Alternative: Use 'python3-venv' for version-agnostic virtual environments"
+                            ;;
+                    esac
+                fi
+            done
+            
+            # Report installation summary
+            if [[ ${#successful_packages[@]} -gt 0 ]]; then
+                log_success "Successfully installed ${#successful_packages[@]} packages: ${successful_packages[*]}"
+            fi
+            
+            if [[ ${#failed_packages[@]} -gt 0 ]]; then
+                log_warn "Failed to install ${#failed_packages[@]} packages: ${failed_packages[*]}"
+                log_info "Installation continuing with available packages..."
             else
-                log_warn "Failed to install some apt packages, continuing with installation"
-                # Don't return error - continue with installation
+                log_success "All apt packages installed successfully"
             fi
         else
             log_info "All apt packages are already installed"

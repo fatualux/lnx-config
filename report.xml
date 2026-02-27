@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuites time="0.016">
-<testsuite name="test_minimal.bats" tests="1" failures="0" errors="0" skipped="0" time="0.016" timestamp="2026-02-26T11:35:07" hostname="N-2KV4P34">
-    <testcase classname="test_minimal.bats" name="simple metadata test" time="0.016" />
-
-</testsuite>
-</testsuites>
