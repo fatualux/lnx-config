@@ -18,8 +18,45 @@ _git_completion_initialize() {
             fi
         done
         
-        # Fallback to basic completion
-        complete -o default -o nospace -F _git git 2>/dev/null || true
+        # Fallback: create basic git completion if system completion not available
+        if ! declare -f _git >/dev/null; then
+            # Fallback completion initialization if _init_completion not available
+            _init_completion() {
+                local cur prev words cword
+                cur="${COMP_WORDS[COMP_CWORD]}"
+                prev="${COMP_WORDS[COMP_CWORD-1]}"
+                words=("${COMP_WORDS[@]}")
+                cword=$COMP_CWORD
+            }
+            
+            _git() {
+                local cur prev words cword
+                _init_completion || return
+                
+                # Basic git commands
+                local commands="add branch checkout clone commit diff fetch log merge pull push rebase status remote show init"
+                
+                # Handle command-specific completions
+                case "${words[1]}" in
+                    checkout|co)
+                        local branches=$(git branch 2>/dev/null | sed 's/^[* ] //')
+                        COMPREPLY=($(compgen -W "$branches" -- "$cur"))
+                        ;;
+                    branch)
+                        COMPREPLY=($(compgen -W "-d -D -m -M -v --list --delete --move --merge --verbose --contains --merged --no-merged" -- "$cur"))
+                        ;;
+                    remote)
+                        COMPREPLY=($(compgen -W "add prune rm show origin" -- "$cur"))
+                        ;;
+                    *)
+                        COMPREPLY=($(compgen -W "$commands" -- "$cur"))
+                        ;;
+                esac
+            }
+            
+            # Register the completion
+            complete -o default -o nospace -F _git git 2>/dev/null || true
+        fi
     fi
 }
 
