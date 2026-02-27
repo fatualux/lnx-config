@@ -71,25 +71,27 @@ copy_custom_configs() {
     fi
 }
 
-# Function to create metadata header
 create_metadata_header() {
     local config_type="$1"  # "bashrc" or "vimrc"
     local module_count="$2"
     local timestamp
     timestamp=$(date -Iseconds)
+
+    local comment_prefix="#"
+    if [[ "$config_type" == "vimrc" ]]; then
+        comment_prefix='"'
+    fi
     
     cat << EOF
-# ========================================
-# Auto-generated $config_type configuration
-# Generated: $timestamp
-# Total modules: $module_count
-# Generator: LNX-CONFIG v$VERSION
-# ========================================
-
+$comment_prefix ========================================
+$comment_prefix Auto-generated $config_type configuration
+$comment_prefix Generated: $timestamp
+$comment_prefix Total modules: $module_count
+$comment_prefix Generator: LNX-CONFIG v$VERSION
+$comment_prefix ========================================
 EOF
 }
 
-# Function to validate bash syntax
 validate_bash_syntax() {
     local bash_file="$1"
     log_debug "Validating bash syntax: $bash_file"
@@ -220,7 +222,7 @@ create_vimrc() {
     # Start with metadata header
     {
         create_metadata_header "vimrc" "$module_count"
-        echo "# Vim Configuration Modules"
+        echo '" Vim Configuration Modules'
         echo ""
     } > "$vimrc_file"
     
@@ -234,7 +236,7 @@ create_vimrc() {
             if [[ -f "$vim_file" ]]; then
                 local file_origin="${vim_file#$SCRIPT_DIR/}"
                 log_info "Appending: $(basename "$vim_file")"
-                echo "# Source: $file_origin" >> "$vimrc_file"
+                echo '" Source: '"$file_origin" >> "$vimrc_file"
                 cat "$vim_file" >> "$vimrc_file"
                 echo "" >> "$vimrc_file"  # Add newline between files
             fi
