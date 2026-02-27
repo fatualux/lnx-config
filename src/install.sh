@@ -331,6 +331,10 @@ create_bashrc() {
             # Skip logger.sh and colors.sh as they're already handled
             if [[ "$basename_file" != "logger.sh" && "$basename_file" != "colors.sh" ]]; then
                 local relative_path="${sh_file#$SCRIPT_DIR/}"
+                # If SCRIPT_DIR removal didn't work, try removing from project root
+                if [[ "$relative_path" == "$sh_file" ]]; then
+                    relative_path="${sh_file#/root/lnx-config/}"
+                fi
                 log_info "Appending: $relative_path"
                 echo "# Source: $relative_path" >> "$bashrc_file"
                 cat "$sh_file" >> "$bashrc_file"
@@ -354,6 +358,10 @@ create_bashrc() {
         # Find all .sh files and sort them
         find "$dir" -name "*.sh" -type f | sort | while read -r sh_file; do
             local relative_path="${sh_file#$SCRIPT_DIR/}"
+            # If SCRIPT_DIR removal didn't work, try removing from project root
+            if [[ "$relative_path" == "$sh_file" ]]; then
+                relative_path="${sh_file#/root/lnx-config/}"
+            fi
             
             log_info "Appending: $relative_path"
             echo "# Source: $relative_path" >> "$bashrc_file"
@@ -375,6 +383,10 @@ create_bashrc() {
         # Append other files first
         while read -r sh_file; do
             local relative_path="${sh_file#$SCRIPT_DIR/}"
+            # If SCRIPT_DIR removal didn't work, try removing from project root
+            if [[ "$relative_path" == "$sh_file" ]]; then
+                relative_path="${sh_file#$CONFIG_SOURCE_DIR/}"
+            fi
             log_info "Appending: $relative_path"
             echo "# Source: $relative_path" >> "$bashrc_file"
             cat "$sh_file" >> "$bashrc_file"
@@ -385,6 +397,10 @@ create_bashrc() {
         if [[ -f "$CORE_BASH_DIR/config/theme.sh" ]]; then
             local theme_path="$CORE_BASH_DIR/config/theme.sh"
             local theme_relative="${theme_path#$SCRIPT_DIR/}"
+            # If SCRIPT_DIR removal didn't work, try removing from CONFIG_SOURCE_DIR
+            if [[ "$theme_relative" == "$theme_path" ]]; then
+                theme_relative="${theme_path#$CONFIG_SOURCE_DIR/}"
+            fi
             log_info "Appending: $theme_relative (last)"
             echo "# Source: $theme_relative (theme configuration)" >> "$bashrc_file"
             cat "$theme_path" >> "$bashrc_file"
